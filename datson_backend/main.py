@@ -1,3 +1,8 @@
+"""
+FastAPI application for processing weather data and converting it to MIDI data.
+Includes endpoints for statistical analysis and MIDI mappings.
+"""
+
 import datetime
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query
@@ -58,6 +63,19 @@ async def get_weather_data(
     end_date: Optional[datetime.date] = settings.END_DATE,
     data_field: DataFields = Query(DataFields.temperature_2m),
 ):
+    """
+    Fetch historical weather data for a specified location and date range.
+
+    Args:
+        lon (float, optional): Longitude of the location. Defaults to settings.LONGITUDE.
+        lat (float, optional): Latitude of the location. Defaults to settings.LATITUDE.
+        start_date (datetime.date, optional): Start date for the data range. Defaults to settings.START_DATE.
+        end_date (datetime.date, optional): End date for the data range. Defaults to settings.END_DATE.
+        data_field (DataFields): The type of weather data to fetch.
+
+    Returns:
+        Data: A dictionary with lists of weather data.
+    """
     df = get_historical_data(
         lon=lon,
         lat=lat,
@@ -78,6 +96,16 @@ async def get_distance_to_before_data(
     request: DataRequest,
     duration_s: int = settings.DURATION,
 ):
+    """
+    Calculate the distance between consecutive data points (to the previous point).
+
+    Args:
+        request (DataRequest): The input data request containing the data list.
+        duration_s (int): The total duration of the data series in seconds.
+
+    Returns:
+        StatisticData: A dictionary with the distance-to-before calculations.
+    """
     data = request.data
     if len(data) > 1000:
         raise HTTPException(
@@ -98,6 +126,16 @@ async def get_distance_to_next_data(
     request: DataRequest,
     duration_s: int = settings.DURATION,
 ):
+    """
+    Calculate the distance between consecutive data points (to the next point).
+
+    Args:
+        request (DataRequest): The input data request containing the data list.
+        duration_s (int): The total duration of the data series in seconds.
+
+    Returns:
+        StatisticData: A dictionary with the distance-to-next calculations.
+    """
     data = request.data
     if len(data) > 1000:
         raise HTTPException(
@@ -120,6 +158,18 @@ async def get_polynomial_fit_data(
     degree: int = None,
     deviation: bool = False,
 ):
+    """
+    Fit a polynomial to the data and optionally calculate deviations.
+
+    Args:
+        request (DataRequest): The input data request containing the data list.
+        duration_s (int): The total duration of the data series in seconds.
+        degree (int, optional): Degree of the polynomial to fit. Defaults to None, which auto-selects the best degree.
+        deviation (bool): Whether to calculate deviations from the polynomial fit.
+
+    Returns:
+        StatisticData: A dictionary with polynomial fit values or their deviations.
+    """
     data = request.data
     if len(data) > 1000:
         raise HTTPException(
@@ -164,6 +214,18 @@ async def get_rolling_average_data(
     window_size: int = settings.WINDOW_SIZE,
     deviation: bool = False,
 ):
+    """
+    Calculate a rolling average of the data and optionally deviations.
+
+    Args:
+        request (DataRequest): Request object containing the input data.
+        duration_s (int): Duration of the dataset in seconds. Defaults to settings.DURATION.
+        window_size (int): Window size for the rolling average. Defaults to settings.WINDOW_SIZE.
+        deviation (bool): Whether to calculate deviations from the rolling average. Defaults to False.
+
+    Returns:
+        StatisticData: Data with rolling average or the deviation optionally.
+    """
     data = request.data
     if len(data) > 1000:
         raise HTTPException(
@@ -203,6 +265,19 @@ async def get_summary_statistic_data(
     percentile: float = None,
     deviation: bool = False,
 ):
+    """
+    Calculate a summary statistic (e.g., min, max, mean) for the data.
+
+    Args:
+        request (DataRequest): Request object containing the input data.
+        duration_s (int): Duration of the dataset in seconds. Defaults to settings.DURATION.
+        aggregation_type (AggregationTypes): Type of aggregation to apply. Defaults to min.
+        percentile (float): Percentile to calculate (if applicable). Defaults to None.
+        deviation (bool): Whether to calculate deviations from the statistic. Defaults to False.
+
+    Returns:
+        StatisticData: Data with summary statistic or the deviation.
+    """
     data = request.data
     if len(data) > 1000:
         raise HTTPException(
@@ -248,6 +323,20 @@ async def get_midi_notes_data(
     velocity_midi_max: int = 127,
     velocity_mapping_reversed: bool = False,
 ):
+    """
+    Map data to MIDI notes, velocities, and durations.
+
+    Args:
+        request (MidiNotesRequest): Request object containing the input data.
+        duration_s (int): Duration of the dataset in seconds. Defaults to settings.DURATION.
+        start_midi_notes (int): Lowest MIDI note value. Defaults to settings.LOWEST_MIDI_NOTE.
+        velocity_midi_min (int): Minimum MIDI velocity value. Defaults to 0.
+        velocity_midi_max (int): Maximum MIDI velocity value. Defaults to 127.
+        velocity_mapping_reversed (bool): Whether to reverse velocity mapping. Defaults to False.
+
+    Returns:
+        MidiNotes: MIDI note data with notes, velocities, and durations.
+    """
     data_notes = request.data_for_notes
     data_velocities = request.data_for_velocity
     data_durations = request.data_for_duration
@@ -296,6 +385,21 @@ async def get_midi_chords_data(
     velocity_mapping_reversed: bool = False,
     chord_type: MidiChordTypes = Query(default=MidiChordTypes.tetrads),
 ):
+    """
+    Map data to MIDI chords.
+
+    Args:
+        request (MidiChordsRequest): Request object containing the input data.
+        duration_s (int): Duration of the dataset in seconds. Defaults to settings.DURATION.
+        start_midi_notes (int): Lowest MIDI note value. Defaults to settings.LOWEST_MIDI_NOTE.
+        velocity_midi_min (int): Minimum MIDI velocity value. Defaults to 0.
+        velocity_midi_max (int): Maximum MIDI velocity value. Defaults to 127.
+        velocity_mapping_reversed (bool): Whether to reverse velocity mapping. Defaults to False.
+        chord_type (MidiChordTypes): Type of chords to generate (triads or tetrads). Defaults to tetrads.
+
+    Returns:
+        MidiChords: MIDI chord data with chords, velocities, and durations.
+    """
     data_chords = request.data_for_chords
     data_velocities = request.data_for_velocity
     data_durations = request.data_for_duration
@@ -356,6 +460,18 @@ async def get_midi_drone_data(
         ]
     ),
 ):
+    """
+    Map data to a MIDI drone using specified aggregation options.
+
+    Args:
+        request (MidiDroneRequest): Request object containing the input data.
+        duration_s (int): Duration of the dataset in seconds. Defaults to settings.DURATION.
+        start_midi_notes (int): Lowest MIDI note value. Defaults to settings.LOWEST_MIDI_NOTE.
+        drone_build_options (List[MidiDroneBuildOptions]): Aggregation options for building the drone. Defaults to [min, median].
+
+    Returns:
+        MidiDrone: MIDI drone data with chords, velocity, and duration.
+    """
     data_drone = request.data_for_drone
     df = pd.DataFrame(
         {
@@ -394,6 +510,20 @@ async def get_midi_chords_data(
     mapping_reversed: bool = False,
     duration_per_cc_value: int = None,
 ):
+    """
+    Map data to MIDI control change (CC) messages.
+
+    Args:
+        request (MidiCCRequest): Request object containing the input data.
+        duration_s (int): Duration of the dataset in seconds. Defaults to settings.DURATION.
+        midi_min (int): Minimum MIDI CC value. Defaults to 0.
+        midi_max (int): Maximum MIDI CC value. Defaults to 127.
+        mapping_reversed (bool): Whether to reverse mapping. Defaults to False.
+        duration_per_cc_value (int): Duration per CC value (if provided). Defaults to None.
+
+    Returns:
+        MidiCC: MIDI CC data with control change messages and durations.
+    """
     data_cc = request.data_for_cc
     data_durations = request.data_for_durations
     if data_durations and not (len(data_cc) == len(data_durations)):
