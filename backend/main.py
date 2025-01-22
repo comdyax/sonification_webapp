@@ -6,6 +6,7 @@ Includes endpoints for statistical analysis and MIDI mappings.
 import datetime
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import pandas as pd
 
@@ -53,6 +54,19 @@ app = FastAPI()
 tag_base = "base"
 tag_stat = "statistical data"
 tag_midi = "midi data"
+
+origins = [
+    "http://localhost",
+    "http://localhost:5173"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/get_data", status_code=200, response_model=Data, tags=[tag_base])

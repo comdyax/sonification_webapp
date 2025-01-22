@@ -1,0 +1,16 @@
+{
+    "glide": 5,
+    "oscillator_wave": 10,
+    "oscillator_timbre": 12,
+    "oscillator_shape": 13,
+    "filter_cutoff": 23,
+    "filter_resonance": 83,
+    "cycling_env_rise": 102,
+    "cycling_env_fall": 103,
+    "cycling_env_hold": 28,
+    "cycling_env_amount": 24,
+    "envelope_attack": 105,
+    "envelope_decay": 106,
+    "envelope_sustain": 29,
+    "envelope_amount": 26
+}
