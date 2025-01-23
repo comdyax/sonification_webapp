@@ -49,16 +49,13 @@ from schemas import (
     MidiDroneBuildOptions,
 )
 
-app = FastAPI()
+app = FastAPI(openapi_prefix="/api")
 
 tag_base = "base"
 tag_stat = "statistical data"
 tag_midi = "midi data"
 
-origins = [
-    "http://localhost",
-    "http://localhost:5173"
-]
+origins = ["http://localhost", "http://localhost:5173"]
 
 app.add_middleware(
     CORSMiddleware,

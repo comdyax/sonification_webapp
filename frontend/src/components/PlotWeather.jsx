@@ -1,27 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Plot from "react-plotly.js";
-import axios from "axios";
+import { useContext } from "react";
+import { DataContext } from "../contexts/DataContext";
+import weatherData from "../services/weatherData";
 
-const LineGraph = () => {
-  const [data, setData] = useState(null);
-  const [startDate, setStartDate] = useState("2025-01-20");
-  const [endDate, setEndDate] = useState("2025-01-21");
-  const [latitude, setLatitude] = useState(0);
-  const [longitude, setLongitude] = useState(0);
+const PlotWeather = () => {
+  const now = new Date();
+  const end = new Date();
+  const start = new Date();
+  end.setDate(now.getDate() - 1);
+  start.setDate(now.getDate() - 2);
+
+  const [plotData, setPlotData] = useState([]);
+  const { setWeatherData } = useContext(DataContext);
+  const [startDate, setStartDate] = useState(start.toISOString().split("T")[0]);
+  const [endDate, setEndDate] = useState(end.toISOString().split("T")[0]);
+  const [latitude, setLatitude] = useState(50.1);
+  const [longitude, setLongitude] = useState(8.2);
   const [dataType, setDataType] = useState("temperature_2m");
+
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/get_data", {
-        params: {
-          start_date: startDate,
-          end_date: endDate,
-          lat: latitude,
-          lon: longitude,
-          data_field: dataType,
-        },
+      const newPlotData = [];
+      const responseData = await weatherData.getWeatherData(
+        startDate,
+        endDate,
+        latitude,
+        longitude,
+        dataType
+      );
+      newPlotData.push({
+        x: responseData["time"],
+        y: responseData["value"],
+        type: "scatter",
+        mode: "lines+markers",
+        name: dataType,
+        marker: { color: "blue" },
       });
-      setData(response.data);
+      setPlotData(newPlotData);
+      setWeatherData(responseData["value"]);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -30,18 +52,6 @@ const LineGraph = () => {
   const handleUpdateClick = () => {
     fetchData();
   };
-
-  const plotData = data
-    ? [
-        {
-          x: data.time,
-          y: data.value,
-          type: "scatter",
-          mode: "lines+markers",
-          marker: { color: "blue" },
-        },
-      ]
-    : [];
 
   return (
     <div>
@@ -90,7 +100,7 @@ const LineGraph = () => {
             <option value="wind_speed_10m">Wind Speed</option>
           </select>
         </label>
-        <button style={{ marginLeft: "20px" }} onClick={handleUpdateClick}>
+        <button style={{ margin: "20px" }} onClick={handleUpdateClick}>
           Update Plot
         </button>
       </div>
@@ -101,10 +111,10 @@ const LineGraph = () => {
           xaxis: { title: "Time" },
           yaxis: { title: "Value" },
         }}
-        style={{ width: "100%", height: "400px" }}
+        style={{ width: "100%", height: "600px" }}
       />
     </div>
   );
 };
 
-export default LineGraph;
+export default PlotWeather;
