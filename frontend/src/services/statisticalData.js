@@ -75,7 +75,7 @@ const getSummaryStat = async (
       duration_s: duration,
       aggregation_type: aggType,
       percentile: percentile,
-      devation: deviation,
+      deviation: deviation,
     },
   });
   return request.data;

@@ -5,6 +5,8 @@ import { DataContext } from "./DataContext";
 export const DataProvider = ({ children }) => {
   const [weatherData, setWeatherData] = useState([]);
   const [data, setData] = useState({});
+  const [polyDegree, setPolyDegree] = useState("");
+  const [windowSize, setWindowSize] = useState(5);
 
   const updateData = (key, dataList) => {
     setData((prev) => ({
@@ -25,6 +27,14 @@ export const DataProvider = ({ children }) => {
     return key in data ? data[key] : [];
   };
 
+  const removeData = (key) => {
+    if (key in data) {
+      setData((prev) =>
+        Object.fromEntries(Object.entries(prev).filter(([k]) => k !== key))
+      );
+    }
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -34,6 +44,11 @@ export const DataProvider = ({ children }) => {
         getData,
         getDataValues,
         getDataKeys,
+        removeData,
+        polyDegree,
+        setPolyDegree,
+        windowSize,
+        setWindowSize,
       }}
     >
       {children}

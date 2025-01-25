@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Plot from "react-plotly.js";
 import { useContext } from "react";
 import { DataContext } from "../contexts/DataContext";
@@ -18,11 +18,6 @@ const PlotWeather = () => {
   const [latitude, setLatitude] = useState(50.1);
   const [longitude, setLongitude] = useState(8.2);
   const [dataType, setDataType] = useState("temperature_2m");
-
-  useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const fetchData = async () => {
     try {
@@ -55,7 +50,9 @@ const PlotWeather = () => {
 
   return (
     <div>
-      <h2>Weather data</h2>
+      <h2 style={{ textAlign: "center", padding: "4%" }}>
+        1. Select Weather data
+      </h2>
       <div style={{ marginBottom: "20px" }}>
         <label>
           Start Date:&ensp;
