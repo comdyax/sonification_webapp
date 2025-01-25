@@ -211,7 +211,7 @@ def set_cc_values(
 
 
 def set_durations(
-    df: pd.DataFrame, on_column: str, to_column: str = "duration"
+    df: pd.DataFrame, on_column: str, to_column: str = "duration", duration: int = DURATION
 ) -> pd.DataFrame:
     """
     sets duration for each value proportional to complete duration defined at startup.
@@ -220,13 +220,14 @@ def set_durations(
         df (pd.DataFrame): Input dataframe containing MIDI data.
         on_column (str): The column containing the MIDI event data.
         to_column (str): The column for durations.
+        duration (int): of soundscape in seconds. Defaults to DURATION
 
     Returns:
         pd.DataFrame: Dataframe with duration per row (MIDI event)
     """
     with validate_dataframe(df, on_column, to_column, expected_type=[float, int]):
         proportions = df[on_column] / df[on_column].sum()
-        df[to_column] = proportions * DURATION
+        df[to_column] = proportions * duration
         return df
 
 

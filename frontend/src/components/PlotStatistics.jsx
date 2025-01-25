@@ -6,8 +6,15 @@ import { DataContext } from "../contexts/DataContext";
 import { DurationContext } from "../contexts/DurationContext";
 
 const PlotStatistics = () => {
-  const { weatherData, updateData, removeData, polyDegree, setPolyDegree, windowSize, setWindowSize} =
-    useContext(DataContext);
+  const {
+    weatherData,
+    updateData,
+    removeData,
+    polyDegree,
+    setPolyDegree,
+    windowSize,
+    setWindowSize,
+  } = useContext(DataContext);
   const { duration } = useContext(DurationContext);
 
   const [showWeatherdata, setShowWeatherData] = useState(false);
@@ -29,18 +36,23 @@ const PlotStatistics = () => {
     try {
       const newPlotData = [];
       if (showWeatherdata) {
-        newPlotData.push({
-          x: Array.from(
+        const data = {
+          time: Array.from(
             { length: weatherData.length },
             (_, i) => (i / (weatherData.length - 1)) * duration
           ),
-          y: weatherData,
+          value: weatherData,
+        };
+        newPlotData.push({
+          x: data["time"],
+          y: data["value"],
           type: "scatter",
           mode: "lines+markers",
           name: "weather data",
           marker: { color: "blue" },
         });
-        updateData("weatherData", weatherData);
+
+        updateData("weatherData", data);
       } else {
         removeData("weatherData");
       }

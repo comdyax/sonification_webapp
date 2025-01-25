@@ -322,7 +322,7 @@ async def get_summary_statistic_data(
 @app.post(
     "/map_data_to_midi_notes",
     status_code=200,
-    response_model=MidiNotes,
+    response_model=List[MidiNotes],
     tags=[tag_midi],
 )
 async def get_midi_notes_data(
@@ -362,7 +362,7 @@ async def get_midi_notes_data(
             "value_durations": data_durations,
         }
     )
-    df = set_durations(df=df, on_column="value_durations", to_column="duration")
+    df = set_durations(df=df, on_column="value_durations", to_column="duration", duration=duration_s)
     df = set_velocities(
         df=df,
         on_column="value_velocities",
@@ -377,7 +377,7 @@ async def get_midi_notes_data(
         to_column="note",
         start_midi_value=start_midi_notes,
     )
-    return df.to_dict(orient="list")
+    return df.to_dict(orient="records")
 
 
 @app.post(

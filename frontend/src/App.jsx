@@ -6,6 +6,7 @@ import SelectDuration from "./components/SelectDuration";
 import PlotDistances from "./components/PlotDistances";
 import PlotWeather from "./components/PlotWeather";
 import PlotStatistics from "./components/PlotStatistics";
+
 import MapDataToMidi from "./components/MapDataToMidi";
 
 function App() {
