@@ -79,7 +79,7 @@ def add_distance_to_next(
 def find_best_polynomial_fit(
     df: pd.DataFrame,
     on_column: str = "value",
-    max_degree: int = 25,
+    max_degree: int = 24,
     random_state: int = 42,
     test_size: float = 0.2,
 ) -> Tuple[List[float], List[float], int]:
@@ -122,6 +122,11 @@ def find_best_polynomial_fit(
             poly = PolynomialFeatures(degree=degree)
             x_poly_train = poly.fit_transform(x_train)
             x_poly_test = poly.transform(x_test)
+
+            if not np.isfinite(x_poly_train).all():
+                raise ValueError(
+                    f"PolynomialFeatures produced invalid values at degree {degree}."
+                )
 
             model = LinearRegression()
             model.fit(x_poly_train, y_train)

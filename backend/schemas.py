@@ -71,6 +71,12 @@ class StatisticData(BaseModel):
     value: List[float]
 
 
+class StatisticDataPoly(BaseModel):
+    time: List[float]
+    value: List[float]
+    degree: int
+
+
 class MidiNotes(BaseModel):
     note: List[int]
     velocity: List[int]

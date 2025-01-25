@@ -47,6 +47,7 @@ from schemas import (
     MidiChordTypes,
     MidiDroneRequest,
     MidiDroneBuildOptions,
+    StatisticDataPoly,
 )
 
 app = FastAPI(openapi_prefix="/api")
@@ -160,7 +161,7 @@ async def get_distance_to_next_data(
 @app.post(
     "/get_polynomial_fit",
     status_code=200,
-    response_model=StatisticData,
+    response_model=StatisticDataPoly,
     tags=[tag_stat],
 )
 async def get_polynomial_fit_data(
@@ -188,9 +189,7 @@ async def get_polynomial_fit_data(
         )
     df = pd.DataFrame({"time": np.linspace(0, duration_s, len(data)), "value": data})
     if degree is None:
-        degree = find_best_polynomial_fit(
-            df=df, on_column="value", max_degree=len(df) - 1
-        )[2]
+        degree = find_best_polynomial_fit(df=df, on_column="value")[2]
     elif degree >= len(df):
         raise HTTPException(
             status_code=422,
@@ -210,7 +209,7 @@ async def get_polynomial_fit_data(
             on_column="value",
             to_column="value",
         )
-    return df.to_dict(orient="list")
+    return StatisticDataPoly(time=df["time"], value=df["value"], degree=degree)
 
 
 @app.post(
