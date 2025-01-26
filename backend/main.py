@@ -577,6 +577,6 @@ async def get_midi_chords_data(
             on_column="cc_message",
             duration_column="duration",
             custom_duration_s=duration_per_cc_value,
+            duration_s=duration_s,
         )
-        print(df)
     return df.to_dict(orient="records")

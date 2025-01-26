@@ -211,7 +211,10 @@ def set_cc_values(
 
 
 def set_durations(
-    df: pd.DataFrame, on_column: str, to_column: str = "duration", duration: int = DURATION
+    df: pd.DataFrame,
+    on_column: str,
+    to_column: str = "duration",
+    duration: int = DURATION,
 ) -> pd.DataFrame:
     """
     sets duration for each value proportional to complete duration defined at startup.
@@ -274,7 +277,11 @@ def set_velocities(
 
 
 def interpolate_for_custom_interval(
-    df: pd.DataFrame, on_column: str, duration_column: str, custom_duration_s: int = 1
+    df: pd.DataFrame,
+    on_column: str,
+    duration_column: str,
+    custom_duration_s: int = 1,
+    duration_s: int = DURATION,
 ) -> pd.DataFrame:
     """
     Interpolates data for custom intervals (e.g., to fit MIDI events into a specific time frame).
@@ -291,11 +298,11 @@ def interpolate_for_custom_interval(
     """
     with validate_dataframe(df, on_column, duration_column, expected_type=[float, int]):
         df_custom = df.copy().reset_index(drop=True)
-        df_custom["lin_time"] = np.linspace(start=0, stop=DURATION, num=len(df)).astype(
-            int
-        )
+        df_custom["lin_time"] = np.linspace(
+            start=0, stop=duration_s, num=len(df)
+        ).astype(int)
         custom_durations = pd.DataFrame(
-            {"lin_time": np.arange(start=0, stop=DURATION, step=custom_duration_s)}
+            {"lin_time": np.arange(start=0, stop=duration_s, step=custom_duration_s)}
         )
         merge_type = "right" if len(custom_durations) <= len(df_custom) else "outer"
         df_custom = pd.merge(

@@ -4,11 +4,12 @@ import { MIDIContext } from "../contexts/MidiContext";
 import { DurationContext } from "../contexts/DurationContext";
 import midiData from "../services/midiData";
 import { dataTextMapping } from "../config";
+import PropTypes from "prop-types";
 
-const DataToCC = () => {
+const DataToCC = ({ index, onRemove }) => {
   const { getDataKeys, getDataValues } = useContext(DataContext);
   const { duration } = useContext(DurationContext);
-  const { setCCData } = useContext(MIDIContext);
+  const { appendCCData, removeCCData } = useContext(MIDIContext);
   const [midiMin, setMidiMin] = useState(0);
   const [midiMax, setMidiMax] = useState(127);
   const [ccNumber, setCCNumber] = useState(null);
@@ -31,13 +32,19 @@ const DataToCC = () => {
         getDataValues(dataDuration)
       );
       response.ccNumber = ccNumber;
-      setCCData(response);
+      appendCCData(index, response);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
+
+  const handleRemove = () => {
+    onRemove();
+    removeCCData(index);
+  };
   return (
     <>
+      <h2>MIDI Control Change Data {index + 1}</h2>
       <label>
         minimum midi: &ensp;
         <input
@@ -58,29 +65,21 @@ const DataToCC = () => {
       <br />
       <label>
         CC Number of midi Controller: &ensp;
-        <input
-          type="number"
-          value={ccNumber}
-          onChange={(e) => setCCNumber(e.target.value)}
-        />
+        <input type="number" onChange={(e) => setCCNumber(e.target.value)} />
       </label>
       <br />
       <label>
         reverse midi mapping: &ensp;
         <input
           type="checkbox"
-          value={reverseMapping}
-          onChange={(e) => setReverseMapping(e.target.value)}
+          checked={reverseMapping}
+          onChange={() => setReverseMapping(!reverseMapping)}
         />
       </label>
       <br />
       <label>
         set custom duration in seconds: &ensp;
-        <input
-          type="number"
-          value={ccDuration}
-          onChange={(e) => setCCDuration(e.target.value)}
-        />
+        <input type="number" onChange={(e) => setCCDuration(e.target.value)} />
       </label>
       <br />
       <label>
@@ -106,10 +105,18 @@ const DataToCC = () => {
       </label>
       <br />
       <button style={{ margin: "20px" }} onClick={() => fetchData()}>
-        Calculate CC Data
+        Create CC Data
+      </button>
+      <button style={{ margin: "20px" }} onClick={() => handleRemove()}>
+        Remove
       </button>
     </>
   );
 };
 
 export default DataToCC;
+
+DataToCC.propTypes = {
+  index: PropTypes.number.isRequired,
+  onRemove: PropTypes.func.isRequired,
+};

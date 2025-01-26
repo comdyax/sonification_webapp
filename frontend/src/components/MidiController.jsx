@@ -45,32 +45,26 @@ const MidiController = () => {
 
     if (selectedOutput) {
       isPlayingRef.current = true;
-      while (isPlayingRef.current) {
-        if (hasNote) {
-          for (const { note, velocity, duration } of midiData) {
-            if (!isPlayingRef.current) break;
-            sendNoteOn(selectedOutput, note, velocity);
-            setLastNotes(note);
-            await new Promise((resolve) =>
-              setTimeout(resolve, duration * 1000)
-            );
-            if (!isPlayingRef.current) break;
-            sendNoteOff(selectedOutput, note);
+      if (hasNote) {
+        for (const { note, velocity, duration } of midiData) {
+          if (!isPlayingRef.current) break;
+          sendNoteOn(selectedOutput, note, velocity);
+          setLastNotes(note);
+          await new Promise((resolve) => setTimeout(resolve, duration * 1000));
+          if (!isPlayingRef.current) break;
+          sendNoteOff(selectedOutput, note);
+        }
+      } else if (hasChord) {
+        for (const { chord, velocity, duration } of midiData) {
+          if (!isPlayingRef.current) break;
+          for (const c of chord) {
+            sendNoteOn(selectedOutput, c, velocity);
           }
-        } else if (hasChord) {
-          for (const { chord, velocity, duration } of midiData) {
-            if (!isPlayingRef.current) break;
-            for (const c of chord) {
-              sendNoteOn(selectedOutput, c, velocity);
-            }
-            setLastNotes(chord);
-            await new Promise((resolve) =>
-              setTimeout(resolve, duration * 1000)
-            );
-            if (!isPlayingRef.current) break;
-            for (const c of chord) {
-              sendNoteOff(selectedOutput, c);
-            }
+          setLastNotes(chord);
+          await new Promise((resolve) => setTimeout(resolve, duration * 1000));
+          if (!isPlayingRef.current) break;
+          for (const c of chord) {
+            sendNoteOff(selectedOutput, c);
           }
         }
       }
@@ -94,10 +88,10 @@ const MidiController = () => {
     }
   };
 
-  const playCC = async () => {
-    if (selectedOutput && Object.keys(ccData).length > 0) {
-      const ccNumber = ccData.ccNumber;
-      for (const { cc_message, duration } of ccData) {
+  const playCC = async (cc) => {
+    if (selectedOutput && Object.keys(cc).length > 0) {
+      const ccNumber = cc.ccNumber;
+      for (const { cc_message, duration } of cc) {
         if (!isPlayingRef.current) break;
         sendCC(selectedOutput, ccNumber, cc_message);
         await new Promise((resolve) => setTimeout(resolve, duration * 1000));
@@ -110,7 +104,10 @@ const MidiController = () => {
       isPlayingRef.current = false;
       stopNotes();
     } else {
-      await Promise.all([playNotes(), playCC()]);
+      console.log(ccData);
+
+      const ccDataArray = Object.values(ccData);
+      await Promise.all([playNotes(), ...ccDataArray.map(playCC)]);
     }
   };
 
