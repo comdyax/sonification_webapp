@@ -23,6 +23,7 @@ from data_analysis_tools import (
 )
 from data_to_midi_tools import (
     interpolate_for_custom_interval,
+    permutate_chords,
     set_notes,
     set_durations,
     set_velocities,
@@ -40,8 +41,8 @@ from schemas import (
     MidiCCRequest,
     MidiDrone,
     StatisticData,
-    MidiNotes,
-    MidiChords,
+    MidiNote,
+    MidiChord,
     MidiChordsRequest,
     MidiNotesRequest,
     MidiChordTypes,
@@ -322,7 +323,7 @@ async def get_summary_statistic_data(
 @app.post(
     "/map_data_to_midi_notes",
     status_code=200,
-    response_model=List[MidiNotes],
+    response_model=List[MidiNote],
     tags=[tag_midi],
 )
 async def get_midi_notes_data(
@@ -362,7 +363,9 @@ async def get_midi_notes_data(
             "value_durations": data_durations,
         }
     )
-    df = set_durations(df=df, on_column="value_durations", to_column="duration", duration=duration_s)
+    df = set_durations(
+        df=df, on_column="value_durations", to_column="duration", duration=duration_s
+    )
     df = set_velocities(
         df=df,
         on_column="value_velocities",
@@ -383,7 +386,7 @@ async def get_midi_notes_data(
 @app.post(
     "/map_data_to_midi_chords",
     status_code=200,
-    response_model=MidiChords,
+    response_model=List[MidiChord],
     tags=[tag_midi],
 )
 async def get_midi_chords_data(
@@ -450,7 +453,8 @@ async def get_midi_chords_data(
         )
     else:
         raise HTTPException(status_code=422, detail="chord type invalid")
-    return df.to_dict(orient="list")
+    df = permutate_chords(df=df, seed_column="value_chords", chord_column="chord")
+    return df.to_dict(orient="records")
 
 
 @app.post(

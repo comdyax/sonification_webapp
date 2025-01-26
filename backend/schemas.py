@@ -77,16 +77,16 @@ class StatisticDataPoly(BaseModel):
     degree: int
 
 
-class MidiNotes(BaseModel):
+class MidiNote(BaseModel):
     note: int
     velocity: int
     duration: float
 
 
-class MidiChords(BaseModel):
-    chord: List[List[int]]
-    velocity: List[int]
-    duration: List[float]
+class MidiChord(BaseModel):
+    chord: List[int]
+    velocity: int
+    duration: float
 
 
 class MidiDrone(BaseModel):
