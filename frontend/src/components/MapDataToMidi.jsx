@@ -5,6 +5,7 @@ import { MIDIContext } from "../contexts/MidiContext";
 import MidiController from "./MidiController";
 import DataToChords from "./DataToChords";
 import DataToNotes from "./DataToNotes";
+import DataToCC from "./DataToCC";
 
 const MidiPlayer = () => {
   const { midiData } = useContext(MIDIContext);
@@ -89,6 +90,8 @@ const MapDataToMidi = () => {
             {midiStrategy === "notes" && <DataToNotes />}
             <br />
             {midiStrategy === "chords" && <DataToChords />}
+            <br />
+            <DataToCC />
             <br />
             {midiData && <MidiPlayer />}
             <br />

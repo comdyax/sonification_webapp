@@ -428,7 +428,9 @@ async def get_midi_chords_data(
             "value_durations": data_durations,
         }
     )
-    df = set_durations(df=df, on_column="value_durations", to_column="duration")
+    df = set_durations(
+        df=df, on_column="value_durations", to_column="duration", duration=duration_s
+    )
     df = set_velocities(
         df=df,
         on_column="value_velocities",
@@ -513,7 +515,7 @@ async def get_midi_drone_data(
 @app.post(
     "/map_data_to_midi_cc",
     status_code=200,
-    response_model=MidiCC,
+    response_model=List[MidiCC],
     tags=[tag_midi],
 )
 async def get_midi_chords_data(
@@ -566,7 +568,9 @@ async def get_midi_chords_data(
     )
 
     if not duration_per_cc_value:
-        df = set_durations(df=df, on_column="duration_cc", to_column="duration")
+        df = set_durations(
+            df=df, on_column="duration_cc", to_column="duration", duration=duration_s
+        )
     else:
         df = interpolate_for_custom_interval(
             df=df,
@@ -575,4 +579,4 @@ async def get_midi_chords_data(
             custom_duration_s=duration_per_cc_value,
         )
         print(df)
-    return df.to_dict(orient="list")
+    return df.to_dict(orient="records")

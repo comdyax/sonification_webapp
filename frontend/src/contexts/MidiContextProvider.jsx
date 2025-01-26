@@ -4,9 +4,10 @@ import { MIDIContext } from "./MidiContext";
 
 export const MIDIProvider = ({ children }) => {
   const [midiData, setMidiData] = useState({});
+  const [ccData, setCCData] = useState({});
 
   return (
-    <MIDIContext.Provider value={{ midiData, setMidiData }}>
+    <MIDIContext.Provider value={{ midiData, setMidiData, ccData, setCCData }}>
       {children}
     </MIDIContext.Provider>
   );

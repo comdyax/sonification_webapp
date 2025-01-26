@@ -89,14 +89,19 @@ const getMidiToCC = async (
     data_for_durations: durationData,
   };
 
+  const params = {
+    duration_s: duration,
+    midi_min: midiMin,
+    midi_max: midiMax,
+    mapping_reversed: reverseMapping,
+  };
+
+  if (ccDuration !== undefined && ccDuration !== null && ccDuration !== "") {
+    params.duration_per_cc_value = ccDuration;
+  }
+
   const request = await axios.post(`${baseUrl}/map_data_to_midi_cc`, body, {
-    params: {
-      duration_s: duration,
-      midi_min: midiMin,
-      midi_max: midiMax,
-      mapping_reversed: reverseMapping,
-      duration_per_cc_value: ccDuration,
-    },
+    params: params,
   });
   return request.data;
 };

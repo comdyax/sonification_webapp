@@ -96,5 +96,5 @@ class MidiDrone(BaseModel):
 
 
 class MidiCC(BaseModel):
-    cc_message: List[int]
-    duration: List[float]
+    cc_message: int
+    duration: float
