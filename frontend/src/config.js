@@ -26,3 +26,16 @@ export const chordTypes = {
   triads: "triads",
   tetrads: "tetrads",
 };
+
+export const intervalMapping = {
+  hour: "Hour",
+  day: "Day",
+  month: "Month",
+  year: "Year",
+};
+
+export const noteMappingStrategies = {
+  notes: "Data To Notes",
+  chords: "Data To Chords",
+  drone: "Data To Drone",
+};

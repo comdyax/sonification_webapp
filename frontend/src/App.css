@@ -1,7 +1,28 @@
+
+
+@font-face {
+  font-family: PrimaryFont;
+  src: url(assets/Silkscreen-Regular.ttf);
+}
+
 #root {
   max-width: 100%;
-  margin: 0 auto;
+  margin: auto;
+  font-family: PrimaryFont, "Helvetica", sans-serif;
+  text-align: center;
 }
+
+h1 {
+  padding: 2%;
+}
+
+h2 {
+ padding: 2%;
+}
+
+h3 {
+  padding: 2%;
+ }
 
 
 

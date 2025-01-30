@@ -3,10 +3,11 @@ import Plot from "react-plotly.js";
 import { useContext } from "react";
 import { DataContext } from "../contexts/DataContext";
 import environmentData from "../services/environmentData";
-import { weatherDataMapping } from "../config";
+import { weatherDataMapping, intervalMapping } from "../config";
 
 import statisticalData from "../services/statisticalData";
 import { DurationContext } from "../contexts/DurationContext";
+import { Container, Row, Col, InputGroup, Form, Button } from "react-bootstrap";
 
 const PlotWeather = () => {
   const now = new Date();
@@ -15,11 +16,13 @@ const PlotWeather = () => {
   end.setDate(now.getDate() - 1);
   start.setDate(now.getDate() - 2);
 
+  const [initRender, setInitRender] = useState(true);
   const [startDate, setStartDate] = useState(start.toISOString().split("T")[0]);
   const [endDate, setEndDate] = useState(end.toISOString().split("T")[0]);
   const [latitude, setLatitude] = useState(50.1);
   const [longitude, setLongitude] = useState(8.2);
   const [dataType, setDataType] = useState(Object.keys(weatherDataMapping)[0]);
+  const [interval, setInterval] = useState(Object.keys(intervalMapping)[0]);
 
   const [plotData, setPlotData] = useState([]);
 
@@ -43,7 +46,11 @@ const PlotWeather = () => {
   const [summaryStatsMax, setSummaryStatsMax] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    if (initRender === false) {
+      fetchData();
+    } else {
+      setInitRender(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [duration]);
 
@@ -71,7 +78,7 @@ const PlotWeather = () => {
         y: tmp["value"],
         type: "scatter",
         mode: "lines+markers",
-        name: dataType,
+        name: weatherDataMapping[dataType],
         marker: { color: "blue" },
       });
       envData = tmp["value"];
@@ -283,152 +290,193 @@ const PlotWeather = () => {
   };
 
   return (
-    <div>
-      <Plot
-        data={plotData}
-        layout={{
-          title: "Data Over Time",
-          xaxis: { title: "Time" },
-          yaxis: { title: "Value" },
-          legend: {
-            orientation: "h",
-            x: 0.5,
-            xanchor: "center",
-            y: -0.2,
-            yanchor: "top",
-          },
-        }}
-        style={{
-          width: "100%",
-          height: "600px",
-          paddingBottom: "4%",
-          margin: "auto",
-        }}
-      />
-      <div style={{ marginBottom: "20px" }}>
-        <label>
-          Start Date:&ensp;
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-        </label>
-        <label style={{ marginLeft: "20px" }}>
-          End Date:&ensp;
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </label>
-        <label style={{ marginLeft: "20px" }}>
-          Latitude:&ensp;
-          <input
-            type="number"
-            value={latitude}
-            onChange={(e) => setLatitude(e.target.value)}
-          />
-        </label>
-        <label style={{ marginLeft: "20px" }}>
-          Longitude:&ensp;
-          <input
-            type="number"
-            value={longitude}
-            onChange={(e) => setLongitude(e.target.value)}
-          />
-        </label>
-        <label style={{ marginLeft: "20px" }}>
-          Data Type:&ensp;
-          <select
-            value={dataType}
-            onChange={(e) => setDataType(e.target.value)}
-          >
-            {Object.keys(weatherDataMapping).map((t) => (
-              <option key={t} value={t}>
-                {weatherDataMapping[t]}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+    <div className="mb-5">
+      <Container fluid className="d-flex justify-content-center">
+        <Plot
+          data={plotData}
+          layout={{
+            width: window.innerWidth * 0.9,
+            height: window.innerHeight * 0.6,
+            title: weatherDataMapping[dataType],
+            xaxis: { title: "Time" },
+            yaxis: { title: "Value" },
+            legend: {
+              orientation: "h",
+              x: 0.5,
+              xanchor: "center",
+              y: -0.2,
+              yanchor: "top",
+            },
+          }}
+        />
+      </Container>
+      <Container fluid>
+        <Row>
+          <Col>
+            <InputGroup className="mb-3">
+              <InputGroup.Text id="start_date">Start Date:</InputGroup.Text>
+              <Form.Control
+                type="date"
+                value={startDate}
+                aria-label="start-date"
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </InputGroup>
+          </Col>
+          <Col>
+            <InputGroup className="mb-3">
+              <InputGroup.Text id="end_date">End Date:</InputGroup.Text>
+              <Form.Control
+                type="date"
+                value={endDate}
+                aria-label="start-date"
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </InputGroup>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <InputGroup className="mb-3">
+              <InputGroup.Text id="lat">Latitude:</InputGroup.Text>
+              <Form.Control
+                placeholder={latitude}
+                value={latitude}
+                step="0.1"
+                type="number"
+                onChange={(e) => setLatitude(e.target.value)}
+              />
+            </InputGroup>
+          </Col>
+          <Col>
+            <InputGroup className="mb-3">
+              <InputGroup.Text id="lon">Longitude:</InputGroup.Text>
+              <Form.Control
+                placeholder={longitude}
+                value={longitude}
+                step="0.1"
+                type="number"
+                onChange={(e) => setLongitude(e.target.value)}
+              />
+            </InputGroup>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <InputGroup className="mb-3">
+              <InputGroup.Text id="interval">Interval:</InputGroup.Text>
+              <Form.Select
+                value={interval}
+                onChange={(e) => setInterval(e.target.value)}
+              >
+                {Object.keys(intervalMapping).map((t) => (
+                  <option key={t} value={t}>
+                    {intervalMapping[t]}
+                  </option>
+                ))}
+              </Form.Select>
+            </InputGroup>
+          </Col>
+          <Col>
+            <InputGroup className="mb-3">
+              <InputGroup.Text id="data-type">Data Type:</InputGroup.Text>
+              <Form.Select
+                value={dataType}
+                onChange={(e) => setDataType(e.target.value)}
+              >
+                {Object.keys(weatherDataMapping).map((t) => (
+                  <option key={t} value={t}>
+                    {weatherDataMapping[t]}
+                  </option>
+                ))}
+              </Form.Select>
+            </InputGroup>
+          </Col>
+        </Row>
+      </Container>
       {weatherData.length > 0 && (
-        <div>
-          <div style={{ margin: "auto" }}>
-            <fieldset>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={polyFit}
-                  onChange={() => setPolyFit(!polyFit)}
-                />
-                polynomial fit &ensp;
-                <br />
-                set degree (defaults to best fit): &ensp;
-                <input
-                  type="number"
-                  value={polyDegree}
+        <Container fluid>
+          <h2>Add Statistix</h2>
+          <Row>
+            <Col>
+              <InputGroup className="mb-3">
+                <InputGroup.Text id="poly-fit">Polynomial Fit:</InputGroup.Text>
+                <InputGroup.Checkbox onChange={() => setPolyFit(!polyFit)} />
+                <InputGroup.Text>Degree (Default Best Fit):</InputGroup.Text>
+                <Form.Control
+                  placeholder={polyDegree}
                   onChange={(e) => setPolyDegree(e.target.value)}
                 />
-              </label>
-            </fieldset>
-            <br />
-            <fieldset>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={summaryStatsMin}
-                  onChange={() => setSummaryStatsMin(!summaryStatsMin)}
-                />
-                minimum
-                <br />
-                <input
-                  type="checkbox"
-                  checked={summaryStatsMean}
-                  onChange={() => setSummaryStatsMean(!summaryStatsMean)}
-                />
-                mean
-                <br />
-                <input
-                  type="checkbox"
-                  checked={summaryStatsMedian}
-                  onChange={() => setSummaryStatsMedian(!summaryStatsMedian)}
-                />
-                median
-                <br />
-                <input
-                  type="checkbox"
-                  checked={summaryStatsMax}
-                  onChange={() => setSummaryStatsMax(!summaryStatsMax)}
-                />
-                maximum
-              </label>
-            </fieldset>
-            <br />
-            <fieldset>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={rollingWindow}
+              </InputGroup>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <InputGroup className="mb-3">
+                <InputGroup.Text id="rolling-avg">
+                  Rolling Window Avg:
+                </InputGroup.Text>
+                <InputGroup.Checkbox
                   onChange={() => setRollingWindow(!rollingWindow)}
                 />
-                rolling window average
-                <br />
-                window size: &ensp;
-                <input
-                  type="number"
-                  value={windowSize}
+                <InputGroup.Text>Window Size:</InputGroup.Text>
+                <Form.Control
+                  placeholder={windowSize}
                   onChange={(e) => setWindowSize(e.target.value)}
                 />
-              </label>
-            </fieldset>
-          </div>
-        </div>
+              </InputGroup>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <InputGroup className="mb-3 d-flex flex-column">
+                <InputGroup.Text>
+                  <Form.Check
+                    className="mx-auto"
+                    inline
+                    type="checkbox"
+                    id="min"
+                    label="Minimum"
+                    onChange={() => setSummaryStatsMin(!summaryStatsMin)}
+                  />
+                  <Form.Check
+                    className="mx-auto"
+                    inline
+                    type="checkbox"
+                    id="mean"
+                    label="Mean"
+                    onChange={() => setSummaryStatsMean(!summaryStatsMean)}
+                  />
+                  <Form.Check
+                    className="mx-auto"
+                    inline
+                    type="checkbox"
+                    id="median"
+                    label="Median"
+                    onChange={() => setSummaryStatsMedian(!summaryStatsMedian)}
+                  />
+                  <Form.Check
+                    className="mx-auto"
+                    inline
+                    type="checkbox"
+                    id="max"
+                    label="Max"
+                    onChange={() => setSummaryStatsMax(!summaryStatsMax)}
+                  />
+                </InputGroup.Text>
+              </InputGroup>
+            </Col>
+          </Row>
+        </Container>
       )}
-      <br />
-      <button style={{ margin: "20px" }} onClick={() => fetchData()}>
-        Update Plot
-      </button>
+      <Button
+        className="md-3"
+        size="lg"
+        variant="dark"
+        onClick={() => fetchData()}
+      >
+        {plotData.length === 0 ? "Fetch Data" : "Update Plot"}
+      </Button>
     </div>
   );
 };

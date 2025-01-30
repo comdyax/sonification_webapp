@@ -1,5 +1,4 @@
-import { useContext, useState, useRef, useEffect } from "react";
-import * as Tone from "tone";
+import { useContext, useState, useEffect } from "react";
 import { DataContext } from "../contexts/DataContext";
 import { MIDIContext } from "../contexts/MidiContext";
 import MidiController from "./MidiController";
@@ -8,99 +7,63 @@ import DataToNotes from "./DataToNotes";
 import CCDataCreator from "./CCDataCreator";
 import MIDIDataTable from "./MidiDataTable";
 
-const MidiPlayer = () => {
-  const { midiData } = useContext(MIDIContext);
-  const [isPlaying, setIsPlaying] = useState(false); // Track playback state
-  const synthRef = useRef(null); // Use ref to persist the synth instance
-  const timeoutIds = useRef([]); // Store timeouts to stop playback
-
-  const playNotes = async () => {
-    await Tone.start(); // Ensure Tone.js is started
-    if (!synthRef.current) {
-      synthRef.current = new Tone.Synth().toDestination(); // Initialize synth once
-    }
-    const synth = synthRef.current;
-
-    let time = Tone.now();
-    midiData.forEach(({ note, velocity, duration }) => {
-      const tone = Tone.Frequency(note, "midi").toNote();
-      const attackTimeout = setTimeout(
-        () => synth.triggerAttack(tone, undefined, velocity),
-        (time - Tone.now()) * 1000
-      );
-      const releaseTimeout = setTimeout(
-        () => synth.triggerRelease(),
-        (time + duration - Tone.now()) * 1000
-      );
-
-      timeoutIds.current.push(attackTimeout, releaseTimeout);
-      time += duration;
-    });
-  };
-
-  const stopNotes = () => {
-    timeoutIds.current.forEach((id) => clearTimeout(id)); // Clear all scheduled timeouts
-    timeoutIds.current = [];
-    if (synthRef.current) {
-      synthRef.current.triggerRelease(); // Ensure any playing note is stopped
-    }
-  };
-
-  const handleButtonClick = () => {
-    if (isPlaying) {
-      stopNotes(); // Stop the playback
-    } else {
-      playNotes(); // Start the playback
-    }
-    setIsPlaying(!isPlaying); // Toggle the playback state
-  };
-
-  return (
-    <div>
-      <button onClick={handleButtonClick}>{isPlaying ? "Stop" : "Play"}</button>
-    </div>
-  );
-};
+import Form from "react-bootstrap/Form";
+import { noteMappingStrategies } from "../config";
+import { Container, Button } from "react-bootstrap";
+import SelectDuration from "./SelectDuration";
 
 const MapDataToMidi = () => {
-  const { midiData } = useContext(MIDIContext);
-  const { getData } = useContext(DataContext);
+  const { midiData, setMidiData } = useContext(MIDIContext);
+  const { weatherData } = useContext(DataContext);
+  const [midiStrategy, setMidiStrategy] = useState("");
 
-  useEffect(() => {}, [getData]);
+  useEffect(() => {}, [weatherData]);
 
-  const [midiStrategy, setMidiStrategy] = useState("notes");
+  const handleSelect = (item) => {
+    setMidiStrategy(item);
+    setMidiData({});
+  };
 
   return (
     <>
-      <div>
-        <h2 style={{ textAlign: "center", padding: "4%" }}>
-          Build Sonification
-        </h2>
-        <div style={{ textAlign: "center" }}>
-          <label>
-            select sonification strategy: &ensp;
-            <select
-              value={midiStrategy}
-              onChange={(e) => setMidiStrategy(e.target.value)}
-            >
-              <option value="notes">data to notes</option>
-              <option value="chords">data to chords</option>
-              <option value="drone">data to drone</option>
-            </select>
-          </label>
-          <br />
+      {weatherData.length > 0 && (
+        <Container fluid className="mb-5">
+          <h1>Build Sonification</h1>
+          <SelectDuration />
+          <Form.Select
+            style={{ textAlign: "center", maxWidth: "400px", margin: "auto" }}
+            size="lg"
+            aria-label="Select Note Mapping Strategy"
+            value={midiStrategy}
+            onChange={(e) => handleSelect(e.target.value)}
+          >
+            <option value={""}>Select Mapping Strategy</option>
+            {Object.entries(noteMappingStrategies).map(([key, value]) => (
+              <option key={key} value={key}>
+                {value}
+              </option>
+            ))}
+          </Form.Select>
+          {midiStrategy && <h3>Map Data to Parameters</h3>}
           {midiStrategy === "notes" && <DataToNotes />}
-          <br />
           {midiStrategy === "chords" && <DataToChords />}
-          <br />
-          <CCDataCreator />
-          <br />
           {midiData.length > 0 && <MIDIDataTable midiData={midiData} />}
+          {/* <CCDataCreator />
           <br />
           {midiData && <MidiController />}
-          <br />
-        </div>
-      </div>
+          <br /> */}
+          {weatherData.length > 0 && (
+            <Button
+              className="m-5"
+              variant="dark"
+              size="lg"
+              onClick={() => window.location.reload()}
+            >
+              Reset
+            </Button>
+          )}
+        </Container>
+      )}
     </>
   );
 };

@@ -1,6 +1,10 @@
 import PropTypes from "prop-types";
+import { Button, Collapse, Container, Table } from "react-bootstrap";
+import { useState } from "react";
 
 const MIDIDataTable = ({ midiData }) => {
+  const [open, setOpen] = useState(false);
+
   const totalNotes = midiData.length;
   const averageVelocity =
     totalNotes > 0
@@ -12,11 +16,12 @@ const MIDIDataTable = ({ midiData }) => {
     totalNotes > 0 ? Math.max(...midiData.map((data) => data.duration)) : 0;
 
   return (
-    <div className="container mt-4">
-      <h2 className="text-center">MIDI Data</h2>
+    <Container fluid>
+      <h2 className="text-center">MIDI {midiData[0].chord ? "Chord" : "Notes"} Data</h2>
       <div className="mb-4">
         <p>
-          Total Notes: <strong>{totalNotes}</strong>
+          {midiData[0].chord ? "Total chords:" : "Total Notes:"}{" "}
+          <strong>{totalNotes}</strong>
         </p>
         <p>
           Average Velocity: <strong>{averageVelocity}</strong>
@@ -25,27 +30,38 @@ const MIDIDataTable = ({ midiData }) => {
           Longest Duration: <strong>{longestDuration}</strong> seconds
         </p>
       </div>
-      <table className="table table-striped table-bordered">
-        <thead className="thead-dark">
-          <tr>
-            <th>{midiData[0].chord ? "Chord" : "Note"}</th>
-            <th>Velocity</th>
-            <th>Duration (seconds)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {midiData.map((data, index) => (
-            <tr key={index}>
-              <td>
-                {data.chord ? "[" + data.chord.join(", ") + "]" : data.note}
-              </td>
-              <td>{data.velocity}</td>
-              <td>{data.duration}</td>
+      <Button
+        onClick={() => setOpen(!open)}
+        aria-controls="midi-data-table"
+        aria-expanded={open}
+        className="mb-2"
+        variant="dark"
+      >
+        {open ? "Hide Midi Data Table" : "Show Midi Data Table"}
+      </Button>
+      <Collapse in={open}>
+        <Table striped bordered hover className="rounded-3 overflow-hidden" variant="dark">
+          <thead className="thead-dark">
+            <tr>
+              <th>{midiData[0].chord ? "Chord" : "Note"}</th>
+              <th>Velocity</th>
+              <th>Duration (seconds)</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {midiData.map((data, index) => (
+              <tr key={index}>
+                <td>
+                  {data.chord ? "[" + data.chord.join(", ") + "]" : data.note}
+                </td>
+                <td>{data.velocity}</td>
+                <td>{data.duration}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </Collapse>
+    </Container>
   );
 };
 
