@@ -16,6 +16,12 @@ export const dataTextMapping = {
   distanceBefore: "absolute distance to value before",
 };
 
+export const weatherDataMapping = {
+  temperature_2m: "Temperature",
+  wind_speed_10m: "Wind speed",
+  relative_humidity_2m: "Humidity",
+};
+
 export const chordTypes = {
   triads: "triads",
   tetrads: "tetrads",

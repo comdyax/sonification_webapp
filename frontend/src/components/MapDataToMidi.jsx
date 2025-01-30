@@ -69,36 +69,34 @@ const MapDataToMidi = () => {
 
   return (
     <>
-      {weatherData.length > 0 && (
-        <div>
-          <h2 style={{ textAlign: "center", padding: "4%" }}>
-            4. Build Sonification
-          </h2>
-          <div style={{ textAlign: "center" }}>
-            <label>
-              select sonification strategy: &ensp;
-              <select
-                value={midiStrategy}
-                onChange={(e) => setMidiStrategy(e.target.value)}
-              >
-                <option value="notes">data to notes</option>
-                <option value="chords">data to chords</option>
-                <option value="drone">data to drone</option>
-              </select>
-            </label>
-            <br />
-            {midiStrategy === "notes" && <DataToNotes />}
-            <br />
-            {midiStrategy === "chords" && <DataToChords />}
-            <br />
-            <CCDataCreator />
-            <br />
-            {midiData && <MidiPlayer />}
-            <br />
-            {midiData && <MidiController />}
-          </div>
+      <div>
+        <h2 style={{ textAlign: "center", padding: "4%" }}>
+          4. Build Sonification
+        </h2>
+        <div style={{ textAlign: "center" }}>
+          <label>
+            select sonification strategy: &ensp;
+            <select
+              value={midiStrategy}
+              onChange={(e) => setMidiStrategy(e.target.value)}
+            >
+              <option value="notes">data to notes</option>
+              <option value="chords">data to chords</option>
+              <option value="drone">data to drone</option>
+            </select>
+          </label>
+          <br />
+          {midiStrategy === "notes" && <DataToNotes />}
+          <br />
+          {midiStrategy === "chords" && <DataToChords />}
+          <br />
+          <CCDataCreator />
+          <br />
+          {midiData && <MidiPlayer />}
+          <br />
+          {midiData && <MidiController />}
         </div>
-      )}
+      </div>
     </>
   );
 };

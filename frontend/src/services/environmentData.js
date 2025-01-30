@@ -12,7 +12,7 @@ const getWeatherData = async (
   const request = await axios.get(baseUrl, {
     params: {
       start_date: startDate,
-      end: endDate,
+      end_date: endDate,
       lat: latitude,
       lon: longitude,
       data_field: dataType,

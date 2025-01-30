@@ -5,7 +5,7 @@ import { useContext } from "react";
 import { DataContext } from "../contexts/DataContext";
 import { DurationContext } from "../contexts/DurationContext";
 
-const PlotStatistics = () => {
+const PlotStatistics = ({plotData, setPlotData}) => {
   const {
     weatherData,
     updateData,
@@ -25,7 +25,7 @@ const PlotStatistics = () => {
   const [summaryStatsMedian, setSummaryStatsMedian] = useState(false);
   const [summaryStatsMax, setSummaryStatsMax] = useState(false);
 
-  const [plotData, setPlotData] = useState([]);
+  // const [plotData, setPlotData] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -275,7 +275,7 @@ const PlotStatistics = () => {
               Update Plot
             </button>
           </div>
-          <Plot
+          {/* <Plot
             data={plotData}
             layout={{
               title: "Data Over Time",
@@ -290,7 +290,7 @@ const PlotStatistics = () => {
               },
             }}
             style={{ width: "100%", height: "600px" }}
-          />
+          /> */}
         </div>
       )}
     </>

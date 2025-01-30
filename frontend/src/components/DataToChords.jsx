@@ -20,6 +20,9 @@ const DataToChords = () => {
 
   const dataTypes = getDataKeys();
 
+  console.log(dataTypes);
+  
+
   const fetchData = async () => {
     try {
       console.log(dataChords);
