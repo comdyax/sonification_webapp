@@ -1,4 +1,4 @@
-import { useContext, useState, useRef } from "react";
+import { useContext, useState, useRef, useEffect } from "react";
 import * as Tone from "tone";
 import { DataContext } from "../contexts/DataContext";
 import { MIDIContext } from "../contexts/MidiContext";
@@ -6,6 +6,7 @@ import MidiController from "./MidiController";
 import DataToChords from "./DataToChords";
 import DataToNotes from "./DataToNotes";
 import CCDataCreator from "./CCDataCreator";
+import MIDIDataTable from "./MidiDataTable";
 
 const MidiPlayer = () => {
   const { midiData } = useContext(MIDIContext);
@@ -63,7 +64,9 @@ const MidiPlayer = () => {
 
 const MapDataToMidi = () => {
   const { midiData } = useContext(MIDIContext);
-  const { weatherData } = useContext(DataContext);
+  const { getData } = useContext(DataContext);
+
+  useEffect(() => {}, [getData]);
 
   const [midiStrategy, setMidiStrategy] = useState("notes");
 
@@ -71,7 +74,7 @@ const MapDataToMidi = () => {
     <>
       <div>
         <h2 style={{ textAlign: "center", padding: "4%" }}>
-          4. Build Sonification
+          Build Sonification
         </h2>
         <div style={{ textAlign: "center" }}>
           <label>
@@ -92,9 +95,10 @@ const MapDataToMidi = () => {
           <br />
           <CCDataCreator />
           <br />
-          {midiData && <MidiPlayer />}
+          {midiData.length > 0 && <MIDIDataTable midiData={midiData} />}
           <br />
           {midiData && <MidiController />}
+          <br />
         </div>
       </div>
     </>

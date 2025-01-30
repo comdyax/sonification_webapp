@@ -1,8 +1,8 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { DataContext } from "../contexts/DataContext";
 import { MIDIContext } from "../contexts/MidiContext";
 import { DurationContext } from "../contexts/DurationContext";
-import midiData from "../services/midiData";
+import midiDataService from "../services/midiDataService";
 import { dataTextMapping } from "../config";
 
 const DataToNotes = () => {
@@ -19,9 +19,14 @@ const DataToNotes = () => {
 
   const dataTypes = getDataKeys();
 
+  useEffect(() => {
+    if (dataTypes.length > 0) fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [duration]);
+
   const fetchData = async () => {
     try {
-      const response = await midiData.getMidiToNotes(
+      const response = await midiDataService.getMidiToNotes(
         duration,
         startMidi,
         velocityMin,

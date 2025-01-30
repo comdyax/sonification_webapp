@@ -1,8 +1,8 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { DataContext } from "../contexts/DataContext";
 import { MIDIContext } from "../contexts/MidiContext";
 import { DurationContext } from "../contexts/DurationContext";
-import midiData from "../services/midiData";
+import midiDataService from "../services/midiDataService";
 import { dataTextMapping, chordTypes } from "../config";
 
 const DataToChords = () => {
@@ -13,21 +13,22 @@ const DataToChords = () => {
   const [velocityMin, setVelocityMin] = useState(50);
   const [velocityMax, setVelocityMax] = useState(127);
   const [reverseVelocity, setReverseVelocity] = useState(false);
-  const [chordType, setChordType] = useState(null);
-  const [dataChords, setDataChords] = useState(null);
-  const [dataDuration, setDataDuration] = useState(null);
-  const [dataVelocity, setDataVelocity] = useState(null);
+  const [chordType, setChordType] = useState(Object.keys(chordTypes)[0]);
 
   const dataTypes = getDataKeys();
 
-  console.log(dataTypes);
-  
+  const [dataChords, setDataChords] = useState(dataTypes[0]);
+  const [dataDuration, setDataDuration] = useState(dataTypes[0]);
+  const [dataVelocity, setDataVelocity] = useState(dataTypes[0]);
+
+  useEffect(() => {
+    if (dataTypes.length > 0) fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [duration]);
 
   const fetchData = async () => {
     try {
-      console.log(dataChords);
-
-      const response = await midiData.getMidiToChords(
+      const response = await midiDataService.getMidiToChords(
         duration,
         startMidi,
         velocityMin,
@@ -83,7 +84,6 @@ const DataToChords = () => {
       <br />
       <label>
         <select onChange={(e) => setChordType(e.target.value)}>
-          <option value="">--select chord type--</option>
           {Object.entries(chordTypes).map(([key, value]) => (
             <option key={key} value={key}>
               {value}
@@ -91,11 +91,9 @@ const DataToChords = () => {
           ))}
         </select>
       </label>
-
       <br />
       <label>
         <select onChange={(e) => setDataChords(e.target.value)}>
-          <option value="">--select data for chords--</option>
           {dataTypes.map((t) => (
             <option key={t} value={t}>
               {dataTextMapping[t]}
@@ -106,7 +104,6 @@ const DataToChords = () => {
       <br />
       <label>
         <select onChange={(e) => setDataDuration(e.target.value)}>
-          <option value="">--select data for duration--</option>
           {dataTypes.map((t) => (
             <option key={t} value={t}>
               {dataTextMapping[t]}
@@ -117,7 +114,6 @@ const DataToChords = () => {
       <br />
       <label>
         <select onChange={(e) => setDataVelocity(e.target.value)}>
-          <option value="">--select data for velocity--</option>
           {dataTypes.map((t) => (
             <option key={t} value={t}>
               {dataTextMapping[t]}

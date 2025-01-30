@@ -380,6 +380,7 @@ async def get_midi_notes_data(
         to_column="note",
         start_midi_value=start_midi_notes,
     )
+    df = df.round(1)
     return df.to_dict(orient="records")
 
 
@@ -456,6 +457,7 @@ async def get_midi_chords_data(
     else:
         raise HTTPException(status_code=422, detail="chord type invalid")
     df = permutate_chords(df=df, seed_column="value_chords", chord_column="chord")
+    df = df.round(1)
     return df.to_dict(orient="records")
 
 

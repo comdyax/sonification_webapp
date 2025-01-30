@@ -1,4 +1,5 @@
 import "./App.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { DataProvider } from "./contexts/DataContextProvider";
 import { DurationProvider } from "./contexts/DurationContextProvider";
 import { MIDIProvider } from "./contexts/MidiContextProvider";

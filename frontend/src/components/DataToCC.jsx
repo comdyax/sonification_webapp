@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { DataContext } from "../contexts/DataContext";
 import { MIDIContext } from "../contexts/MidiContext";
 import { DurationContext } from "../contexts/DurationContext";
-import midiData from "../services/midiData";
+import midiDataService from "../services/midiDataService";
 import { dataTextMapping } from "../config";
 import PropTypes from "prop-types";
 
@@ -22,7 +22,7 @@ const DataToCC = ({ index, onRemove }) => {
 
   const fetchData = async () => {
     try {
-      const response = await midiData.getMidiToCC(
+      const response = await midiDataService.getMidiToCC(
         duration,
         midiMin,
         midiMax,
