@@ -291,12 +291,15 @@ const PlotWeather = () => {
 
   return (
     <div className="mb-5">
-      <Container fluid className="d-flex justify-content-center">
+      <Container fluid className="d-flex justify-content-center mb-3">
         <Plot
           data={plotData}
           layout={{
-            width:  window.innerWidth,
-            height: window.innerWidth > window.innerHeight ? window.innerHeight * 0.6 : window.innerHeight * 0.25,
+            width: window.innerWidth * 0.95,
+            height:
+              window.innerWidth > window.innerHeight
+                ? window.innerHeight * 0.65
+                : window.innerHeight * 0.4,
             title: weatherDataMapping[dataType],
             xaxis: { title: "Time" },
             yaxis: { title: "Value" },
@@ -304,7 +307,7 @@ const PlotWeather = () => {
               orientation: "h",
               x: 0.5,
               xanchor: "center",
-              y: -0.2,
+              y: -0.5,
               yanchor: "top",
             },
           }}

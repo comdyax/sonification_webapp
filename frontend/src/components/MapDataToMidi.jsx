@@ -1,11 +1,8 @@
 import { useContext, useState } from "react";
 import { DataContext } from "../contexts/DataContext";
-import { MIDIContext } from "../contexts/MidiContext";
 import DataToChords from "./DataToChords";
 import DataToNotes from "./DataToNotes";
 import DataToCC from "./DataToCC";
-
-import MIDIDataTable from "./MidiDataTable";
 
 import Form from "react-bootstrap/Form";
 import { noteMappingStrategies } from "../config";

@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useRef } from "react";
 import { DataContext } from "../contexts/DataContext";
 import { MIDIContext } from "../contexts/MidiContext";
 import { DurationContext } from "../contexts/DurationContext";
@@ -8,21 +8,23 @@ import PropTypes from "prop-types";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
 import Form from "react-bootstrap/Form";
+import MIDICCTable from "./MidiCCTable";
 
 const DataToCC = ({ index, onRemove }) => {
   const { getDataKeys, getDataValues } = useContext(DataContext);
   const { duration } = useContext(DurationContext);
   const { appendCCData, removeCCData } = useContext(MIDIContext);
 
+  const tableData = useRef(null);
+  const dataTypes = getDataKeys();
+
   const [midiMin, setMidiMin] = useState(0);
   const [midiMax, setMidiMax] = useState(127);
   const [ccNumber, setCCNumber] = useState(null);
   const [ccDuration, setCCDuration] = useState(null);
   const [reverseMapping, setReverseMapping] = useState(false);
-  const [dataCC, setDataCC] = useState(null);
-  const [dataDuration, setDataDuration] = useState(null);
-
-  const dataTypes = getDataKeys();
+  const [dataCC, setDataCC] = useState(dataTypes[0]);
+  const [dataDuration, setDataDuration] = useState(dataTypes[0]);
 
   const fetchData = async () => {
     try {
@@ -37,6 +39,7 @@ const DataToCC = ({ index, onRemove }) => {
       );
       response.ccNumber = ccNumber;
       appendCCData(index, response);
+      tableData.current = response;
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -127,7 +130,7 @@ const DataToCC = ({ index, onRemove }) => {
         </Col>
       </Row>
       <Row>
-        <Col>
+        <Col xs={2}>
           <Button variant="secondary" size="lg" onClick={() => handleRemove()}>
             Remove
           </Button>
@@ -136,6 +139,9 @@ const DataToCC = ({ index, onRemove }) => {
           <Button variant="dark" size="lg" onClick={() => fetchData()}>
             Calculate Midi Data
           </Button>
+        </Col>
+        <Col xs={6}>
+          {tableData.current && <MIDICCTable midiData={tableData.current} />}
         </Col>
       </Row>
     </Container>

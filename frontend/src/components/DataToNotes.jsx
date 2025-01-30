@@ -3,16 +3,20 @@ import { Button, Container, Row, Col } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
 import PropTypes from "prop-types";
 
-import { useContext, useState } from "react";
+import { useContext, useState, useRef } from "react";
 import { DataContext } from "../contexts/DataContext";
 import { MIDIContext } from "../contexts/MidiContext";
 import midiDataService from "../services/midiDataService";
 import { dataTextMapping } from "../config";
 
+import MIDIDataTable from "./MidiDataTable";
+
 const DataToNotes = ({ index, onRemove }) => {
   const { getDataKeys, getDataValues } = useContext(DataContext);
-
   const { appendMidiData, removeMidiData } = useContext(MIDIContext);
+
+  const tableData = useRef(null);
+
   const [duration, setDuration] = useState(300);
   const [startMidi, setStartMidi] = useState(36);
   const [velocityMin, setVelocityMin] = useState(50);
@@ -37,6 +41,7 @@ const DataToNotes = ({ index, onRemove }) => {
         getDataValues(dataDuration)
       );
       appendMidiData(index, response);
+      tableData.current = response;
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -157,7 +162,7 @@ const DataToNotes = ({ index, onRemove }) => {
         </InputGroup>
       </Row>
       <Row>
-        <Col>
+        <Col xs={2}>
           <Button variant="secondary" size="lg" onClick={() => handleRemove()}>
             Remove
           </Button>
@@ -166,6 +171,9 @@ const DataToNotes = ({ index, onRemove }) => {
           <Button variant="dark" size="lg" onClick={() => fetchData()}>
             Calculate Midi Data
           </Button>
+        </Col>
+        <Col xs={6}>
+          {tableData.current && <MIDIDataTable midiData={tableData.current} />}
         </Col>
       </Row>
     </Container>
