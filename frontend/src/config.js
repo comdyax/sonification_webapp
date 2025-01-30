@@ -38,4 +38,5 @@ export const noteMappingStrategies = {
   notes: "Data To Notes",
   chords: "Data To Chords",
   drone: "Data To Drone",
+  cc: "Data to Control Change",
 };

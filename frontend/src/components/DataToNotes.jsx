@@ -1,20 +1,19 @@
 import Form from "react-bootstrap/Form";
 import { Button, Container, Row, Col } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
+import PropTypes from "prop-types";
 
-import { useContext, useEffect, useState, useRef, useCallback } from "react";
+import { useContext, useState } from "react";
 import { DataContext } from "../contexts/DataContext";
 import { MIDIContext } from "../contexts/MidiContext";
-import { DurationContext } from "../contexts/DurationContext";
 import midiDataService from "../services/midiDataService";
 import { dataTextMapping } from "../config";
 
-const DataToNotes = () => {
-  const isFirstRender = useRef(0);
-
+const DataToNotes = ({ index, onRemove }) => {
   const { getDataKeys, getDataValues } = useContext(DataContext);
-  const { duration } = useContext(DurationContext);
-  const { setMidiData } = useContext(MIDIContext);
+
+  const { appendMidiData, removeMidiData } = useContext(MIDIContext);
+  const [duration, setDuration] = useState(300);
   const [startMidi, setStartMidi] = useState(36);
   const [velocityMin, setVelocityMin] = useState(50);
   const [velocityMax, setVelocityMax] = useState(127);
@@ -24,8 +23,8 @@ const DataToNotes = () => {
   const [dataVelocity, setDataVelocity] = useState("weatherData");
 
   const dataTypes = getDataKeys();
-  
-  const fetchData = useCallback(async () => {
+
+  const fetchData = async () => {
     try {
       const response = await midiDataService.getMidiToNotes(
         duration,
@@ -37,33 +36,20 @@ const DataToNotes = () => {
         getDataValues(dataVelocity),
         getDataValues(dataDuration)
       );
-      setMidiData(response);
+      appendMidiData(index, response);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-  }, [
-    duration,
-    startMidi,
-    velocityMin,
-    velocityMax,
-    reverseVelocity,
-    dataNotes,
-    dataVelocity,
-    dataDuration,
-    getDataValues,
-    setMidiData,
-  ]);
+  };
 
-  useEffect(() => {
-    if (isFirstRender.current < 3) {
-      isFirstRender.current += 1;
-      return;
-    }
-    fetchData();
-  }, [duration, fetchData]);
+  const handleRemove = () => {
+    onRemove();
+    removeMidiData(index);
+  };
 
   return (
     <Container fluid>
+      <h2>MIDI Notes Data {index + 1}</h2>
       <Row>
         <Col xs={4}>
           <InputGroup className="mb-3">
@@ -71,6 +57,9 @@ const DataToNotes = () => {
               Lowest Midi Note:
             </InputGroup.Text>
             <Form.Control
+              type="number"
+              min={0}
+              max={127}
               placeholder={startMidi}
               aria-label="lowest-midi"
               onChange={(e) => setStartMidi(e.target.value)}
@@ -81,11 +70,17 @@ const DataToNotes = () => {
           <InputGroup className="mb-3">
             <InputGroup.Text>Velocity Range:</InputGroup.Text>
             <Form.Control
+              type="number"
+              min={0}
+              max={127}
               placeholder={velocityMin}
               aria-label="min-velocity"
               onChange={(e) => setVelocityMin(e.target.value)}
             />
             <Form.Control
+              type="number"
+              min={0}
+              max={127}
               placeholder={velocityMax}
               aria-label="max-velocity"
               onChange={(e) => setVelocityMax(e.target.value)}
@@ -148,11 +143,38 @@ const DataToNotes = () => {
           </InputGroup>
         </Col>
       </Row>
-      <Button variant="dark" size="lg" onClick={() => fetchData()}>
-        Calculate Midi Data
-      </Button>
+      <Row>
+        <InputGroup className="mb-3">
+          <InputGroup.Text id="duration">
+            Duration of Sonification in Seconds:
+          </InputGroup.Text>
+          <Form.Control
+            type="number"
+            placeholder={duration}
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+          />
+        </InputGroup>
+      </Row>
+      <Row>
+        <Col>
+          <Button variant="secondary" size="lg" onClick={() => handleRemove()}>
+            Remove
+          </Button>
+        </Col>
+        <Col>
+          <Button variant="dark" size="lg" onClick={() => fetchData()}>
+            Calculate Midi Data
+          </Button>
+        </Col>
+      </Row>
     </Container>
   );
 };
 
 export default DataToNotes;
+
+DataToNotes.propTypes = {
+  index: PropTypes.number.isRequired,
+  onRemove: PropTypes.func.isRequired,
+};

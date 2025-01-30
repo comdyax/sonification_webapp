@@ -295,8 +295,8 @@ const PlotWeather = () => {
         <Plot
           data={plotData}
           layout={{
-            width: window.innerWidth * 0.9,
-            height: window.innerHeight * 0.6,
+            width:  window.innerWidth,
+            height: window.innerWidth > window.innerHeight ? window.innerHeight * 0.6 : window.innerHeight * 0.25,
             title: weatherDataMapping[dataType],
             xaxis: { title: "Time" },
             yaxis: { title: "Value" },

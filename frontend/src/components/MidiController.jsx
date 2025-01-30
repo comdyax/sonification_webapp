@@ -104,10 +104,12 @@ const MidiController = () => {
       isPlayingRef.current = false;
       stopNotes();
     } else {
-      console.log(ccData);
-
       const ccDataArray = Object.values(ccData);
-      await Promise.all([playNotes(), ...ccDataArray.map(playCC)]);
+      const midiDataArray = Object.values(midiData);
+      await Promise.all([
+        ...midiDataArray.map(playNotes),
+        ...ccDataArray.map(playCC),
+      ]);
     }
   };
 

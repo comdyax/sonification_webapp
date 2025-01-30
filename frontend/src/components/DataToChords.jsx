@@ -1,19 +1,17 @@
-import { useContext, useEffect, useState, useCallback, useRef } from "react";
+import { useContext, useState } from "react";
 import { DataContext } from "../contexts/DataContext";
 import { MIDIContext } from "../contexts/MidiContext";
-import { DurationContext } from "../contexts/DurationContext";
 import midiDataService from "../services/midiDataService";
 import { dataTextMapping, chordTypes } from "../config";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
 import Form from "react-bootstrap/Form";
+import PropTypes from "prop-types";
 
-const DataToChords = () => {
-  const isFirstRender = useRef(0);
-
+const DataToChords = ({ index, onRemove }) => {
   const { getDataKeys, getDataValues } = useContext(DataContext);
-  const { duration } = useContext(DurationContext);
-  const { setMidiData } = useContext(MIDIContext);
+  const [duration, setDuration] = useState(300);
+  const { appendMidiData, removeMidiData } = useContext(MIDIContext);
   const [startMidi, setStartMidi] = useState(36);
   const [velocityMin, setVelocityMin] = useState(50);
   const [velocityMax, setVelocityMax] = useState(127);
@@ -26,7 +24,7 @@ const DataToChords = () => {
   const [dataDuration, setDataDuration] = useState(dataTypes[0]);
   const [dataVelocity, setDataVelocity] = useState(dataTypes[0]);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = async () => {
     try {
       const response = await midiDataService.getMidiToChords(
         duration,
@@ -39,34 +37,20 @@ const DataToChords = () => {
         getDataValues(dataVelocity),
         getDataValues(dataDuration)
       );
-      setMidiData(response);
+      appendMidiData(index, response);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-  }, [
-    duration,
-    startMidi,
-    velocityMin,
-    velocityMax,
-    reverseVelocity,
-    chordType,
-    dataVelocity,
-    dataDuration,
-    dataChords,
-    getDataValues,
-    setMidiData,
-  ]);
+  };
 
-  useEffect(() => {
-    if (isFirstRender.current < 3) {
-      isFirstRender.current += 1;
-      return;
-    }
-    fetchData();
-  }, [duration, fetchData]);
+  const handleRemove = () => {
+    onRemove();
+    removeMidiData(index);
+  };
 
   return (
     <Container fluid>
+      <h2>MIDI Chord Data {index + 1}</h2>
       <Row>
         <Col xs={4}>
           <InputGroup className="mb-3">
@@ -169,11 +153,38 @@ const DataToChords = () => {
           </InputGroup>
         </Col>
       </Row>
-      <Button variant="dark" size="lg" onClick={() => fetchData()}>
-        Calculate Midi Data
-      </Button>
+      <Row>
+        <InputGroup className="mb-3">
+          <InputGroup.Text id="duration">
+            Duration of Sonification in Seconds:
+          </InputGroup.Text>
+          <Form.Control
+            type="number"
+            placeholder={duration}
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+          />
+        </InputGroup>
+      </Row>
+      <Row>
+        <Col>
+          <Button variant="secondary" size="lg" onClick={() => handleRemove()}>
+            Remove
+          </Button>
+        </Col>
+        <Col>
+          <Button variant="dark" size="lg" onClick={() => fetchData()}>
+            Calculate Midi Data
+          </Button>
+        </Col>
+      </Row>
     </Container>
   );
 };
 
 export default DataToChords;
+
+DataToChords.propTypes = {
+  index: PropTypes.number.isRequired,
+  onRemove: PropTypes.func.isRequired,
+};
