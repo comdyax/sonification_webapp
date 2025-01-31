@@ -45,13 +45,13 @@ const MapDataToMidi = () => {
         <Container fluid className="mb-5">
           <h1>Build Sonification</h1>
           <Form.Select
-            style={{ textAlign: "center", maxWidth: "400px", margin: "auto" }}
+            style={{ textAlign: "center", maxWidth: "560px", margin: "auto" }}
             size="lg"
             aria-label="Select Note Mapping Strategy"
             value="Select Mapping Strategy"
             onChange={(e) => addComponent(e.target.value)}
           >
-            <option>Select Mapping Strategy</option>
+            <option>-- Select/Add Mapping Strategy --</option>
             {Object.entries(noteMappingStrategies).map(([key, value]) => (
               <option key={key} value={key}>
                 {value}

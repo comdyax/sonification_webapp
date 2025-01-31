@@ -8,11 +8,13 @@ import InputGroup from "react-bootstrap/InputGroup";
 import Form from "react-bootstrap/Form";
 import PropTypes from "prop-types";
 import MIDIDataTable from "./MidiDataTable";
+import MIDIDataPlot from "./MidiDataPlot";
 
 const DataToChords = ({ index, onRemove }) => {
   const { getDataKeys, getDataValues } = useContext(DataContext);
-  const [duration, setDuration] = useState(300);
   const { appendMidiData, removeMidiData } = useContext(MIDIContext);
+
+  const [duration, setDuration] = useState(300);
   const [startMidi, setStartMidi] = useState(36);
   const [velocityMin, setVelocityMin] = useState(50);
   const [velocityMax, setVelocityMax] = useState(127);
@@ -21,9 +23,10 @@ const DataToChords = ({ index, onRemove }) => {
 
   const dataTypes = getDataKeys();
   const tableData = useRef(null);
+
   const [dataChords, setDataChords] = useState(dataTypes[0]);
-  const [dataDuration, setDataDuration] = useState(dataTypes[0]);
-  const [dataVelocity, setDataVelocity] = useState(dataTypes[0]);
+  const [dataDuration, setDataDuration] = useState(dataTypes[1]);
+  const [dataVelocity, setDataVelocity] = useState(dataTypes[2]);
 
   const fetchData = async () => {
     try {
@@ -52,7 +55,7 @@ const DataToChords = ({ index, onRemove }) => {
 
   return (
     <Container fluid>
-      <h2>MIDI Chord Data {index + 1}</h2>
+      <h2>{index + 1}. MIDI Chord Data</h2>
       <Row>
         <Col xs={4}>
           <InputGroup className="mb-3">
@@ -60,6 +63,9 @@ const DataToChords = ({ index, onRemove }) => {
               Lowest Midi Note:
             </InputGroup.Text>
             <Form.Control
+              type="number"
+              min={0}
+              max={127}
               placeholder={startMidi}
               aria-label="lowest-midi"
               onChange={(e) => setStartMidi(e.target.value)}
@@ -70,11 +76,17 @@ const DataToChords = ({ index, onRemove }) => {
           <InputGroup className="mb-3">
             <InputGroup.Text>Velocity Range:</InputGroup.Text>
             <Form.Control
+              type="number"
+              min={0}
+              max={127}
               placeholder={velocityMin}
               aria-label="min-velocity"
               onChange={(e) => setVelocityMin(e.target.value)}
             />
             <Form.Control
+              type="number"
+              min={0}
+              max={127}
               placeholder={velocityMax}
               aria-label="max-velocity"
               onChange={(e) => setVelocityMax(e.target.value)}
@@ -163,27 +175,28 @@ const DataToChords = ({ index, onRemove }) => {
           <Form.Control
             type="number"
             placeholder={duration}
-            value={duration}
             onChange={(e) => setDuration(e.target.value)}
           />
         </InputGroup>
       </Row>
       <Row>
-        <Col xs={2}>
+        <Col xs={3}>
           <Button variant="secondary" size="lg" onClick={() => handleRemove()}>
             Remove
           </Button>
         </Col>
-        <Col>
+        <Col xs={3}>
           <Button variant="dark" size="lg" onClick={() => fetchData()}>
-            Calculate Midi Data
+            Calculate
           </Button>
         </Col>
-        <Col xs={6}>
-        {tableData.current && <MIDIDataTable midiData={tableData.current} />}
+        <Col xs={3}>
+          {tableData.current && <MIDIDataTable midiData={tableData.current} />}
+        </Col>
+        <Col xs={3}>
+          {tableData.current && <MIDIDataPlot midiData={tableData.current} />}
         </Col>
       </Row>
-      
     </Container>
   );
 };

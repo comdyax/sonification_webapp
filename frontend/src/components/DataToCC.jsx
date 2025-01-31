@@ -1,27 +1,27 @@
 import { useContext, useState, useRef } from "react";
 import { DataContext } from "../contexts/DataContext";
 import { MIDIContext } from "../contexts/MidiContext";
-import { DurationContext } from "../contexts/DurationContext";
 import midiDataService from "../services/midiDataService";
 import { dataTextMapping } from "../config";
 import PropTypes from "prop-types";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
 import Form from "react-bootstrap/Form";
-import MIDICCTable from "./MidiCCTable";
+import MIDIDataPlot from "./MidiDataPlot";
+import MIDIDataTable from "./MidiDataTable";
 
 const DataToCC = ({ index, onRemove }) => {
   const { getDataKeys, getDataValues } = useContext(DataContext);
-  const { duration } = useContext(DurationContext);
   const { appendCCData, removeCCData } = useContext(MIDIContext);
 
   const tableData = useRef(null);
   const dataTypes = getDataKeys();
 
+  const [duration, setDuration] = useState(300);
   const [midiMin, setMidiMin] = useState(0);
   const [midiMax, setMidiMax] = useState(127);
   const [ccNumber, setCCNumber] = useState(null);
-  const [ccDuration, setCCDuration] = useState(null);
+  const [ccDuration, setCCDuration] = useState(1);
   const [reverseMapping, setReverseMapping] = useState(false);
   const [dataCC, setDataCC] = useState(dataTypes[0]);
   const [dataDuration, setDataDuration] = useState(dataTypes[0]);
@@ -51,7 +51,7 @@ const DataToCC = ({ index, onRemove }) => {
   };
   return (
     <Container fluid>
-      <h2>MIDI Control Change Data {index + 1}</h2>
+      <h2>{index + 1}. MIDI Control Change Data</h2>
       <Row>
         <Col xs={4}>
           <InputGroup className="mb-3">
@@ -70,6 +70,7 @@ const DataToCC = ({ index, onRemove }) => {
             <Form.Control
               placeholder={midiMin}
               aria-label="midi-min"
+              type="number"
               min={0}
               max={127}
               onChange={(e) => setMidiMin(e.target.value)}
@@ -77,6 +78,7 @@ const DataToCC = ({ index, onRemove }) => {
             <Form.Control
               placeholder={midiMax}
               aria-label="midi-max"
+              type="number"
               min={0}
               max={127}
               onChange={(e) => setMidiMax(e.target.value)}
@@ -111,37 +113,52 @@ const DataToCC = ({ index, onRemove }) => {
             <InputGroup.Text>Duration:</InputGroup.Text>
             <Form.Select
               aria-label="duration-cc"
-              value={dataDuration}
               onChange={(e) => setDataDuration(e.target.value)}
             >
+              <option>--opt. add data--</option>
               {dataTypes.map((t) => (
                 <option key={t} value={t}>
                   {dataTextMapping[t]}
                 </option>
               ))}
             </Form.Select>
-            <InputGroup.Text>Custom</InputGroup.Text>
+            <InputGroup.Text>Fixed Duration:</InputGroup.Text>
             <Form.Control
               type="number"
-              value={dataCC}
+              placeholder={ccDuration}
               onChange={(e) => setCCDuration(e.target.value)}
             />
           </InputGroup>
         </Col>
       </Row>
       <Row>
-        <Col xs={2}>
+        <InputGroup className="mb-3">
+          <InputGroup.Text id="duration">
+            Duration of Sonification in Seconds:
+          </InputGroup.Text>
+          <Form.Control
+            type="number"
+            placeholder={duration}
+            onChange={(e) => setDuration(e.target.value)}
+          />
+        </InputGroup>
+      </Row>
+      <Row>
+        <Col xs={3}>
           <Button variant="secondary" size="lg" onClick={() => handleRemove()}>
             Remove
           </Button>
         </Col>
-        <Col>
+        <Col xs={3}>
           <Button variant="dark" size="lg" onClick={() => fetchData()}>
-            Calculate Midi Data
+            Calculate
           </Button>
         </Col>
-        <Col xs={6}>
-          {tableData.current && <MIDICCTable midiData={tableData.current} />}
+        <Col xs={3}>
+          {tableData.current && <MIDIDataTable midiData={tableData.current} />}
+        </Col>
+        <Col xs={3}>
+          {tableData.current && <MIDIDataPlot midiData={tableData.current} />}
         </Col>
       </Row>
     </Container>

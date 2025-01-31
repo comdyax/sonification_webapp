@@ -12,6 +12,10 @@
   text-align: center;
 }
 
+.modal-content, .table {
+  font-family: PrimaryFont, "Helvetica", sans-serif !important;
+}
+
 h1 {
   padding: 2%;
 }
@@ -24,6 +28,9 @@ h3 {
   padding: 2%;
  }
 
+.modal-90w {
+  min-width:90%;
+}
 
 
 

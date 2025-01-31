@@ -15,7 +15,7 @@ const MIDICCTable = ({ midiData }) => {
         className="mb-2"
         variant="dark"
       >
-        {open ? "Hide Midi Data Table" : "Show Midi Data Table"}
+        {open ? "Hide Data" : "Show Data"}
       </Button>
       <Collapse in={open}>
         <div>

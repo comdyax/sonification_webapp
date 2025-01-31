@@ -10,23 +10,24 @@ import midiDataService from "../services/midiDataService";
 import { dataTextMapping } from "../config";
 
 import MIDIDataTable from "./MidiDataTable";
+import MIDIDataPlot from "./MidiDataPlot";
 
 const DataToNotes = ({ index, onRemove }) => {
   const { getDataKeys, getDataValues } = useContext(DataContext);
   const { appendMidiData, removeMidiData } = useContext(MIDIContext);
-
-  const tableData = useRef(null);
 
   const [duration, setDuration] = useState(300);
   const [startMidi, setStartMidi] = useState(36);
   const [velocityMin, setVelocityMin] = useState(50);
   const [velocityMax, setVelocityMax] = useState(127);
   const [reverseVelocity, setReverseVelocity] = useState(false);
-  const [dataNotes, setDataNotes] = useState("weatherData");
-  const [dataDuration, setDataDuration] = useState("weatherData");
-  const [dataVelocity, setDataVelocity] = useState("weatherData");
 
   const dataTypes = getDataKeys();
+  const tableData = useRef(null);
+
+  const [dataNotes, setDataNotes] = useState(dataTypes[0]);
+  const [dataDuration, setDataDuration] = useState(dataTypes[1]);
+  const [dataVelocity, setDataVelocity] = useState(dataTypes[2]);
 
   const fetchData = async () => {
     try {
@@ -54,7 +55,7 @@ const DataToNotes = ({ index, onRemove }) => {
 
   return (
     <Container fluid>
-      <h2>MIDI Notes Data {index + 1}</h2>
+      <h2>{index + 1}. MIDI Notes Data</h2>
       <Row>
         <Col xs={4}>
           <InputGroup className="mb-3">
@@ -131,6 +132,8 @@ const DataToNotes = ({ index, onRemove }) => {
             </Form.Select>
           </InputGroup>
         </Col>
+      </Row>
+      <Row>
         <Col>
           <InputGroup className="mb-3">
             <InputGroup.Text>Velocity:</InputGroup.Text>
@@ -147,33 +150,35 @@ const DataToNotes = ({ index, onRemove }) => {
             </Form.Select>
           </InputGroup>
         </Col>
+        <Col>
+          <InputGroup className="mb-3">
+            <InputGroup.Text id="duration">
+              Duration of Sonification in Seconds:
+            </InputGroup.Text>
+            <Form.Control
+              type="number"
+              placeholder={duration}
+              onChange={(e) => setDuration(e.target.value)}
+            />
+          </InputGroup>
+        </Col>
       </Row>
       <Row>
-        <InputGroup className="mb-3">
-          <InputGroup.Text id="duration">
-            Duration of Sonification in Seconds:
-          </InputGroup.Text>
-          <Form.Control
-            type="number"
-            placeholder={duration}
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-          />
-        </InputGroup>
-      </Row>
-      <Row>
-        <Col xs={2}>
+        <Col xs={3}>
           <Button variant="secondary" size="lg" onClick={() => handleRemove()}>
             Remove
           </Button>
         </Col>
-        <Col>
+        <Col xs={3}>
           <Button variant="dark" size="lg" onClick={() => fetchData()}>
-            Calculate Midi Data
+            Calculate
           </Button>
         </Col>
-        <Col xs={6}>
+        <Col xs={3}>
           {tableData.current && <MIDIDataTable midiData={tableData.current} />}
+        </Col>
+        <Col xs={3}>
+          {tableData.current && <MIDIDataPlot midiData={tableData.current} />}
         </Col>
       </Row>
     </Container>
