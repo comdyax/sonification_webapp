@@ -1,7 +1,10 @@
 import { useState, useEffect, useContext, useRef } from "react";
 import { MIDIContext } from "../contexts/MidiContext";
+import { Container, Button, Modal, Form, Row, Col } from "react-bootstrap";
 
 const MidiController = () => {
+  const [open, setOpen] = useState(false);
+
   const [outputDevices, setOutputDevices] = useState([]);
   const [selectedOutput, setSelectedOutput] = useState(null);
   const { midiData, ccData } = useContext(MIDIContext);
@@ -24,10 +27,12 @@ const MidiController = () => {
     }
   };
 
-  const sendNoteOff = (device, note) => {
+  const sendNoteOff = (device, note, log = true) => {
     if (device) {
       device.send([0x80, note, 0]); // 0x80 = note_off message
-      console.log(`Note Off: ${note}`);
+      if (log) {
+        console.log(`Note Off: ${note}`);
+      }
     }
   };
 
@@ -38,24 +43,25 @@ const MidiController = () => {
     }
   };
 
-  const playNotes = async () => {
-    const firstEntry = midiData[0];
+  const playNotes = async (midi) => {
+    const firstEntry = midi[0];
     const hasNote = "note" in firstEntry;
     const hasChord = "chord" in firstEntry;
 
     if (selectedOutput) {
       isPlayingRef.current = true;
       if (hasNote) {
-        for (const { note, velocity, duration } of midiData) {
+        for (const { note, velocity, duration } of midi) {
           if (!isPlayingRef.current) break;
           sendNoteOn(selectedOutput, note, velocity);
           setLastNotes(note);
           await new Promise((resolve) => setTimeout(resolve, duration * 1000));
           if (!isPlayingRef.current) break;
           sendNoteOff(selectedOutput, note);
+          await new Promise((resolve) => setTimeout(resolve, 1));
         }
       } else if (hasChord) {
-        for (const { chord, velocity, duration } of midiData) {
+        for (const { chord, velocity, duration } of midi) {
           if (!isPlayingRef.current) break;
           for (const c of chord) {
             sendNoteOn(selectedOutput, c, velocity);
@@ -66,6 +72,7 @@ const MidiController = () => {
           for (const c of chord) {
             sendNoteOff(selectedOutput, c);
           }
+          await new Promise((resolve) => setTimeout(resolve, 1));
         }
       }
       isPlayingRef.current = false;
@@ -76,12 +83,8 @@ const MidiController = () => {
 
   const stopNotes = () => {
     if (selectedOutput) {
-      if (typeof lastNotes === "number") {
-        sendNoteOff(selectedOutput, lastNotes);
-      } else if (Array.isArray(lastNotes)) {
-        for (const n of lastNotes) {
-          sendNoteOff(selectedOutput, n);
-        }
+      for (let m = 0; m < 128; m++) {
+        sendNoteOff(selectedOutput, m, false);
       }
       isPlayingRef.current = false;
       console.log("Playback stopped");
@@ -103,9 +106,11 @@ const MidiController = () => {
     if (isPlayingRef.current) {
       isPlayingRef.current = false;
       stopNotes();
+      console.log("stopping");
     } else {
       const ccDataArray = Object.values(ccData);
       const midiDataArray = Object.values(midiData);
+      console.log("playing");
       await Promise.all([
         ...midiDataArray.map(playNotes),
         ...ccDataArray.map(playCC),
@@ -118,21 +123,64 @@ const MidiController = () => {
     setSelectedOutput(device);
   };
 
+  const handleClose = () => {
+    setOpen(false);
+    // isPlayingRef.current = false;
+    // stopNotes();
+    // console.log("stopping");
+  };
+  const handleShow = () => setOpen(true);
+
   return (
-    <div>
-      <h1>MIDI Controller</h1>
-      <select onChange={(e) => handleDeviceSelect(e.target.value)}>
-        <option value="">--Select MIDI Device--</option>
-        {outputDevices.map((device) => (
-          <option key={device.id} value={device.id}>
-            {device.name}
-          </option>
-        ))}
-      </select>
-      <button onClick={togglePlayback}>
-        {isPlayingRef.current ? "Stop" : "Play"}
-      </button>
-    </div>
+    <Container fluid className="m-5">
+      <Button size="lg" onClick={handleShow} className="mb-2" variant="dark">
+        {open ? "Close Midi Controller" : "Open Midi Controller"}
+      </Button>
+      <div>
+        <Modal show={open} onHide={handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Midi Controller</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            <Container fluid>
+              <Row>
+                <Col className="m-5">
+                  <Form.Select
+                    style={{
+                      textAlign: "center",
+                      margin: "auto",
+                    }}
+                    size="lg"
+                    aria-label="Select Type"
+                    onChange={(e) => handleDeviceSelect(e.target.value)}
+                  >
+                    <option value="">--Select MIDI Device--</option>
+                    {outputDevices.map((device) => (
+                      <option key={device.id} value={device.id}>
+                        {device.name}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Col>
+              </Row>
+              <Row>
+                <Col className="d-flex justify-content-center m-5">
+                  <Button onClick={togglePlayback} size="lg" variant="dark">
+                    {isPlayingRef.current ? "Stop" : "Play"}
+                  </Button>
+                </Col>
+              </Row>
+            </Container>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" size="lg" onClick={handleClose}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
+    </Container>
   );
 };
 

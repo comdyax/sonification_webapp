@@ -105,7 +105,7 @@ const DataToChords = ({ index, onRemove }) => {
             <InputGroup.Text>Chordtype:</InputGroup.Text>
             <Form.Select
               aria-label="data-notes"
-              value={dataChords}
+              value={chordType}
               onChange={(e) => setChordType(e.target.value)}
             >
               {Object.entries(chordTypes).map(([key, value]) => (

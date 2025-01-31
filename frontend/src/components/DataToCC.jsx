@@ -21,7 +21,7 @@ const DataToCC = ({ index, onRemove }) => {
   const [midiMin, setMidiMin] = useState(0);
   const [midiMax, setMidiMax] = useState(127);
   const [ccNumber, setCCNumber] = useState(null);
-  const [ccDuration, setCCDuration] = useState(1);
+  const [ccDuration, setCCDuration] = useState(null);
   const [reverseMapping, setReverseMapping] = useState(false);
   const [dataCC, setDataCC] = useState(dataTypes[0]);
   const [dataDuration, setDataDuration] = useState(dataTypes[0]);

@@ -53,6 +53,20 @@ const MIDIDataPlot = ({ midiData }) => {
       usedColors.push(color);
     }
 
+    if (midiData[0].cc_message) {
+      const color = getRandomColor(usedColors);
+      const yAxisMidi = midiData.map((data) => data.cc_message);
+      data.push({
+        x: xAxis,
+        y: yAxisMidi,
+        type: "scatter",
+        mode: "lines+markers",
+        name: "cc values",
+        marker: { color: color },
+      });
+      usedColors.push(color);
+    }
+
     if (midiData[0].velocity) {
       const yAxisVelocity = midiData.map((data) => data.velocity);
       data.push({
@@ -67,11 +81,15 @@ const MIDIDataPlot = ({ midiData }) => {
     return data;
   }, [midiData]);
 
-  const [plotData, setPlotData] = useState(data[0]);
+  const [plotData, setPlotData] = useState(null);
   const [plotDataType, setPlotDataType] = useState("value");
 
   useEffect(() => {
-    setPlotData(data.slice(0, -1));
+    if (midiData[0].cc_message) {
+      setPlotData(data);
+    } else {
+      setPlotData(data.slice(0, -1));
+    }
     setPlotDataType("value");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [midiData]);
@@ -94,16 +112,18 @@ const MIDIDataPlot = ({ midiData }) => {
           <Modal.Header closeButton>
             <Modal.Title>Midi Data Plot</Modal.Title>
             <Modal.Title className="position-absolute top-1 start-50 translate-middle-x">
-              <Form.Select
-                aria-label="Select Note Mapping Strategy"
-                value={plotDataType}
-                onChange={(e) => handleSelect(e.target.value)}
-              >
-                <option value="value">
-                  {midiData[0].chord ? "Chord" : "Notes"}
-                </option>
-                <option value="velocity">Velocity</option>
-              </Form.Select>
+              {!midiData[0].cc_message && (
+                <Form.Select
+                  aria-label="Select Type"
+                  value={plotDataType}
+                  onChange={(e) => handleSelect(e.target.value)}
+                >
+                  <option value="value">
+                    {midiData[0].chord ? "Chord" : "Notes"}
+                  </option>
+                  <option value="velocity">Velocity</option>
+                </Form.Select>
+              )}
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -144,8 +164,9 @@ MIDIDataPlot.propTypes = {
   midiData: PropTypes.arrayOf(
     PropTypes.shape({
       note: PropTypes.number,
+      cc_message: PropTypes.number,
       chord: PropTypes.array,
-      velocity: PropTypes.number.isRequired,
+      velocity: PropTypes.number,
       duration: PropTypes.number.isRequired,
     })
   ).isRequired,

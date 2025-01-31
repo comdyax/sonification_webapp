@@ -6,7 +6,8 @@ import DataToCC from "./DataToCC";
 
 import Form from "react-bootstrap/Form";
 import { noteMappingStrategies } from "../config";
-import { Container, Button } from "react-bootstrap";
+import { Container, Button, Row, Col } from "react-bootstrap";
+import MidiController from "./MidiController";
 
 const MapDataToMidi = () => {
   const { weatherData } = useContext(DataContext);
@@ -44,38 +45,49 @@ const MapDataToMidi = () => {
       {weatherData.length > 0 && (
         <Container fluid className="mb-5">
           <h1>Build Sonification</h1>
-          <Form.Select
-            style={{ textAlign: "center", maxWidth: "560px", margin: "auto" }}
-            size="lg"
-            aria-label="Select Note Mapping Strategy"
-            value="Select Mapping Strategy"
-            onChange={(e) => addComponent(e.target.value)}
-          >
-            <option>-- Select/Add Mapping Strategy --</option>
-            {Object.entries(noteMappingStrategies).map(([key, value]) => (
-              <option key={key} value={key}>
-                {value}
-              </option>
-            ))}
-          </Form.Select>
-          {Object.entries(midiComponents).map(([id, component]) => {
-            const ComponentType = midiMappingComponents[component.strategy];
-            return ComponentType ? (
-              <ComponentType
-                key={id}
-                index={component.id}
-                onRemove={() => removeMidiComponent(id)}
-              />
-            ) : null;
-          })}
-          <Button
-            className="m-5"
-            variant="dark"
-            size="lg"
-            onClick={() => window.location.reload()}
-          >
-            Reset
-          </Button>
+          <Row>
+            <Form.Select
+              style={{ textAlign: "center", maxWidth: "560px", margin: "auto" }}
+              size="lg"
+              aria-label="Select Note Mapping Strategy"
+              value="Select Mapping Strategy"
+              onChange={(e) => addComponent(e.target.value)}
+            >
+              <option>-- Select/Add Mapping Strategy --</option>
+              {Object.entries(noteMappingStrategies).map(([key, value]) => (
+                <option key={key} value={key}>
+                  {value}
+                </option>
+              ))}
+            </Form.Select>
+          </Row>
+          <Row>
+            {Object.entries(midiComponents).map(([id, component]) => {
+              const ComponentType = midiMappingComponents[component.strategy];
+              return ComponentType ? (
+                <ComponentType
+                  key={id}
+                  index={component.id}
+                  onRemove={() => removeMidiComponent(id)}
+                />
+              ) : null;
+            })}
+          </Row>
+          <Row>
+            <Col>
+              <MidiController />
+            </Col>
+            <Col>
+              <Button
+                className="m-5"
+                variant="dark"
+                size="lg"
+                onClick={() => window.location.reload()}
+              >
+                Reset All
+              </Button>
+            </Col>
+          </Row>
         </Container>
       )}
     </>
