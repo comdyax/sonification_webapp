@@ -74,9 +74,11 @@ const MapDataToMidi = () => {
             })}
           </Row>
           <Row>
-            <Col>
-              <MidiController />
-            </Col>
+            {Object.keys(midiComponents).length > 0 && (
+              <Col>
+                <MidiController />
+              </Col>
+            )}
             <Col>
               <Button
                 className="m-5"

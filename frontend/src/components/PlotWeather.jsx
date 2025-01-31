@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
-import Plot from "react-plotly.js";
+import { useState } from "react";
 import { useContext } from "react";
 import { DataContext } from "../contexts/DataContext";
 import environmentData from "../services/environmentData";
 import { weatherDataMapping, intervalMapping } from "../config";
 
 import statisticalData from "../services/statisticalData";
-import { DurationContext } from "../contexts/DurationContext";
 import { Container, Row, Col, InputGroup, Form, Button } from "react-bootstrap";
+import WeatherPlot from "./WeatherPlot";
+import WeatherTable from "./WeatherTable";
 
 const PlotWeather = () => {
   const now = new Date();
@@ -16,7 +16,6 @@ const PlotWeather = () => {
   end.setDate(now.getDate() - 1);
   start.setDate(now.getDate() - 2);
 
-  const [initRender, setInitRender] = useState(true);
   const [startDate, setStartDate] = useState(start.toISOString().split("T")[0]);
   const [endDate, setEndDate] = useState(end.toISOString().split("T")[0]);
   const [latitude, setLatitude] = useState(50.1);
@@ -36,7 +35,8 @@ const PlotWeather = () => {
     windowSize,
     setWindowSize,
   } = useContext(DataContext);
-  const { duration } = useContext(DurationContext);
+
+  const duration = 300;
 
   const [polyFit, setPolyFit] = useState(false);
   const [rollingWindow, setRollingWindow] = useState(false);
@@ -44,15 +44,6 @@ const PlotWeather = () => {
   const [summaryStatsMean, setSummaryStatsMean] = useState(false);
   const [summaryStatsMedian, setSummaryStatsMedian] = useState(false);
   const [summaryStatsMax, setSummaryStatsMax] = useState(false);
-
-  useEffect(() => {
-    if (initRender === false) {
-      fetchData();
-    } else {
-      setInitRender(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [duration]);
 
   const fetchData = async () => {
     try {
@@ -290,29 +281,7 @@ const PlotWeather = () => {
   };
 
   return (
-    <div className="mb-5">
-      <Container fluid className="d-flex justify-content-center mb-3">
-        <Plot
-          data={plotData}
-          layout={{
-            width: window.innerWidth * 0.95,
-            height:
-              window.innerWidth > window.innerHeight
-                ? window.innerHeight * 0.65
-                : window.innerHeight * 0.4,
-            title: weatherDataMapping[dataType],
-            xaxis: { title: "Time" },
-            yaxis: { title: "Value" },
-            legend: {
-              orientation: "h",
-              x: 0.5,
-              xanchor: "center",
-              y: -0.5,
-              yanchor: "top",
-            },
-          }}
-        />
-      </Container>
+    <Container fluid>
       <Container fluid>
         <Row>
           <Col>
@@ -472,15 +441,32 @@ const PlotWeather = () => {
           </Row>
         </Container>
       )}
-      <Button
-        className="md-3"
-        size="lg"
-        variant="dark"
-        onClick={() => fetchData()}
-      >
-        {plotData.length === 0 ? "Fetch Data" : "Update Plot"}
-      </Button>
-    </div>
+      <Row>
+        <Col>
+          <Button
+            className="m-3"
+            size="lg"
+            variant="dark"
+            onClick={() => fetchData()}
+          >
+            {plotData.length === 0 ? "Fetch Data" : "Update Data"}
+          </Button>
+        </Col>
+        {weatherData.length > 0 && (
+          <>
+            <Col>
+              <WeatherTable data={plotData} />
+            </Col>
+            <Col>
+              <WeatherPlot
+                plotData={plotData}
+                plotName={weatherDataMapping[dataType]}
+              />
+            </Col>
+          </>
+        )}
+      </Row>
+    </Container>
   );
 };
 

@@ -49,6 +49,7 @@ const DataToCC = ({ index, onRemove }) => {
     onRemove();
     removeCCData(index);
   };
+  
   return (
     <Container fluid>
       <h2>{index + 1}. MIDI Control Change Data</h2>

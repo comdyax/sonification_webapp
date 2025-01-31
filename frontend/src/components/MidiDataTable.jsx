@@ -26,10 +26,8 @@ const MidiTable = ({ midiData }) => {
       </p>
       <Table
         striped
-        bordered
         hover
         className="rounded-3 overflow-hidden"
-        variant="dark"
       >
         <thead className="thead-dark">
           <tr>
@@ -72,10 +70,8 @@ const CCTable = ({ midiData }) => {
       <h2>CC Number: {midiData.ccNumber}</h2>
       <Table
         striped
-        bordered
         hover
         className="rounded-3 overflow-hidden"
-        variant="dark"
       >
         <thead className="thead-dark">
           <tr>

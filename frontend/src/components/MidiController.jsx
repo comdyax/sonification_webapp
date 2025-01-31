@@ -8,8 +8,8 @@ const MidiController = () => {
   const [outputDevices, setOutputDevices] = useState([]);
   const [selectedOutput, setSelectedOutput] = useState(null);
   const { midiData, ccData } = useContext(MIDIContext);
-  const [lastNotes, setLastNotes] = useState(null);
   const isPlayingRef = useRef(false);
+  const loopRef = useRef(false);
 
   useEffect(() => {
     navigator
@@ -50,31 +50,35 @@ const MidiController = () => {
 
     if (selectedOutput) {
       isPlayingRef.current = true;
-      if (hasNote) {
-        for (const { note, velocity, duration } of midi) {
-          if (!isPlayingRef.current) break;
-          sendNoteOn(selectedOutput, note, velocity);
-          setLastNotes(note);
-          await new Promise((resolve) => setTimeout(resolve, duration * 1000));
-          if (!isPlayingRef.current) break;
-          sendNoteOff(selectedOutput, note);
-          await new Promise((resolve) => setTimeout(resolve, 1));
-        }
-      } else if (hasChord) {
-        for (const { chord, velocity, duration } of midi) {
-          if (!isPlayingRef.current) break;
-          for (const c of chord) {
-            sendNoteOn(selectedOutput, c, velocity);
+      do {
+        if (hasNote) {
+          for (const { note, velocity, duration } of midi) {
+            if (!isPlayingRef.current) break;
+            sendNoteOn(selectedOutput, note, velocity);
+            await new Promise((resolve) =>
+              setTimeout(resolve, duration * 1000)
+            );
+            if (!isPlayingRef.current) break;
+            sendNoteOff(selectedOutput, note);
+            await new Promise((resolve) => setTimeout(resolve, 1));
           }
-          setLastNotes(chord);
-          await new Promise((resolve) => setTimeout(resolve, duration * 1000));
-          if (!isPlayingRef.current) break;
-          for (const c of chord) {
-            sendNoteOff(selectedOutput, c);
+        } else if (hasChord) {
+          for (const { chord, velocity, duration } of midi) {
+            if (!isPlayingRef.current) break;
+            for (const c of chord) {
+              sendNoteOn(selectedOutput, c, velocity);
+            }
+            await new Promise((resolve) =>
+              setTimeout(resolve, duration * 1000)
+            );
+            if (!isPlayingRef.current) break;
+            for (const c of chord) {
+              sendNoteOff(selectedOutput, c);
+            }
+            await new Promise((resolve) => setTimeout(resolve, 1));
           }
-          await new Promise((resolve) => setTimeout(resolve, 1));
         }
-      }
+      } while (loopRef.current);
       isPlayingRef.current = false;
     } else {
       console.error("No MIDI device selected");
@@ -83,9 +87,11 @@ const MidiController = () => {
 
   const stopNotes = () => {
     if (selectedOutput) {
-      for (let m = 0; m < 128; m++) {
-        sendNoteOff(selectedOutput, m, false);
-      }
+      do {
+        for (let m = 0; m < 128; m++) {
+          sendNoteOff(selectedOutput, m, false);
+        }
+      } while (loopRef.current);
       isPlayingRef.current = false;
       console.log("Playback stopped");
     }
@@ -105,6 +111,7 @@ const MidiController = () => {
   const togglePlayback = async () => {
     if (isPlayingRef.current) {
       isPlayingRef.current = false;
+      loopRef.current = false;
       stopNotes();
       console.log("stopping");
     } else {
@@ -125,9 +132,6 @@ const MidiController = () => {
 
   const handleClose = () => {
     setOpen(false);
-    // isPlayingRef.current = false;
-    // stopNotes();
-    // console.log("stopping");
   };
   const handleShow = () => setOpen(true);
 
@@ -145,7 +149,7 @@ const MidiController = () => {
           <Modal.Body>
             <Container fluid>
               <Row>
-                <Col className="m-5">
+                <Col className="m-4">
                   <Form.Select
                     style={{
                       textAlign: "center",
@@ -165,7 +169,17 @@ const MidiController = () => {
                 </Col>
               </Row>
               <Row>
-                <Col className="d-flex justify-content-center m-5">
+                <Col className="d-flex justify-content-center m-1">
+                  <Form.Check
+                    type="switch"
+                    id="loop-switch"
+                    label="loop soundscape"
+                    onChange={() => (loopRef.current = !loopRef.current)}
+                  />
+                </Col>
+              </Row>
+              <Row>
+                <Col className="d-flex justify-content-center m-4">
                   <Button onClick={togglePlayback} size="lg" variant="dark">
                     {isPlayingRef.current ? "Stop" : "Play"}
                   </Button>
