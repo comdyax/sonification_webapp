@@ -126,6 +126,7 @@ async def get_distance_to_before_data(
         )
     df = pd.DataFrame({"time": np.linspace(0, duration_s, len(data)), "value": data})
     df = add_distance_to_before(df=df, on_column="value", to_column="value")
+    df = df.round(1)
     return df.to_dict(orient="list")
 
 
@@ -156,6 +157,7 @@ async def get_distance_to_next_data(
         )
     df = pd.DataFrame({"time": np.linspace(0, duration_s, len(data)), "value": data})
     df = add_distance_to_next(df=df, on_column="value", to_column="value")
+    df = df.round(1)
     return df.to_dict(orient="list")
 
 
@@ -210,6 +212,7 @@ async def get_polynomial_fit_data(
             on_column="value",
             to_column="value",
         )
+    df = df.round(1)
     return StatisticDataPoly(time=df["time"], value=df["value"], degree=degree)
 
 
@@ -260,6 +263,7 @@ async def get_rolling_average_data(
             on_column="value",
             to_column="value",
         )
+    df = df.round(1)
     return df.to_dict(orient="list")
 
 
@@ -317,6 +321,7 @@ async def get_summary_statistic_data(
             on_column="value",
             to_column="value",
         )
+    df = df.round(1)
     return df.to_dict(orient="list")
 
 
