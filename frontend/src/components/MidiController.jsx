@@ -8,6 +8,8 @@ const MidiController = () => {
   const [outputDevices, setOutputDevices] = useState([]);
   const [selectedOutput, setSelectedOutput] = useState(null);
   const { midiData, ccData } = useContext(MIDIContext);
+
+  const [isPlaying, setIsPlaying] = useState(false);
   const isPlayingRef = useRef(false);
   const loopRef = useRef(false);
 
@@ -112,9 +114,11 @@ const MidiController = () => {
     if (isPlayingRef.current) {
       isPlayingRef.current = false;
       loopRef.current = false;
+      setIsPlaying(false);
       stopNotes();
       console.log("stopping");
     } else {
+      setIsPlaying(true);
       const ccDataArray = Object.values(ccData);
       const midiDataArray = Object.values(midiData);
       console.log("playing");
@@ -132,6 +136,13 @@ const MidiController = () => {
 
   const handleClose = () => {
     setOpen(false);
+    if (isPlayingRef.current) {
+      togglePlayback();
+    }
+  };
+
+  const handleLoopSwitch = () => {
+    loopRef.current = !loopRef.current;
   };
   const handleShow = () => setOpen(true);
 
@@ -141,7 +152,12 @@ const MidiController = () => {
         {open ? "Close Midi Controller" : "Open Midi Controller"}
       </Button>
       <div>
-        <Modal show={open} onHide={handleClose}>
+        <Modal
+          show={open}
+          onHide={handleClose}
+          backdrop="static"
+          keyboard={false}
+        >
           <Modal.Header closeButton>
             <Modal.Title>Midi Controller</Modal.Title>
           </Modal.Header>
@@ -159,12 +175,22 @@ const MidiController = () => {
                     aria-label="Select Type"
                     onChange={(e) => handleDeviceSelect(e.target.value)}
                   >
-                    <option value="">--Select MIDI Device--</option>
-                    {outputDevices.map((device) => (
-                      <option key={device.id} value={device.id}>
-                        {device.name}
-                      </option>
-                    ))}
+                    {selectedOutput ? (
+                      <option>{selectedOutput.name}</option>
+                    ) : (
+                      <option value="">--Select MIDI Device--</option>
+                    )}
+
+                    {outputDevices
+                      .filter(
+                        (device) =>
+                          !selectedOutput || device.id !== selectedOutput.id
+                      ) // Filter out the selected device
+                      .map((device) => (
+                        <option key={device.id} value={device.id}>
+                          {device.name}
+                        </option>
+                      ))}
                   </Form.Select>
                 </Col>
               </Row>
@@ -174,14 +200,15 @@ const MidiController = () => {
                     type="switch"
                     id="loop-switch"
                     label="loop soundscape"
-                    onChange={() => (loopRef.current = !loopRef.current)}
+                    defaultChecked={loopRef.current}
+                    onChange={() => handleLoopSwitch()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col className="d-flex justify-content-center m-4">
                   <Button onClick={togglePlayback} size="lg" variant="dark">
-                    {isPlayingRef.current ? "Stop" : "Play"}
+                    {isPlaying ? "Stop" : "Play"}
                   </Button>
                 </Col>
               </Row>
