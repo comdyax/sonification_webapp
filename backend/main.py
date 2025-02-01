@@ -518,6 +518,7 @@ async def get_midi_drone_data(
         duration_column_name="duration",
         aggregation_types=drone_build_options,
     )
+    df = df.round(1)
     result = {"chord": df.loc[0, "chord"], "velocity": 100, "duration": duration_s}
     return result
 
@@ -528,7 +529,7 @@ async def get_midi_drone_data(
     response_model=List[MidiCC],
     tags=[tag_midi],
 )
-async def get_midi_chords_data(
+async def get_midi_cc_data(
     request: MidiCCRequest,
     duration_s: int = settings.DURATION,
     midi_min: int = 0,
@@ -589,4 +590,5 @@ async def get_midi_chords_data(
             custom_duration_s=duration_per_cc_value,
             duration_s=duration_s,
         )
+    df = df.round(1)
     return df.to_dict(orient="records")

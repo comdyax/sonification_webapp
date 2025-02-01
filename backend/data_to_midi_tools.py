@@ -229,6 +229,8 @@ def set_durations(
         pd.DataFrame: Dataframe with duration per row (MIDI event)
     """
     with validate_dataframe(df, on_column, to_column, expected_type=[float, int]):
+        minimum = abs(df[on_column].min()) + 1
+        df[on_column] = df[on_column] + minimum
         proportions = df[on_column] / df[on_column].sum()
         df[to_column] = proportions * duration
         return df

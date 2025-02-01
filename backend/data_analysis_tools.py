@@ -104,9 +104,7 @@ def find_best_polynomial_fit(
     """
     with validate_dataframe(df, on_column, expected_type=[float, int]):
         if max_degree > len(df) - 1:
-            raise ValueError(
-                f"the max_degree should not be higher than number of datapoints: '{max_degree} > {len(df)}'"
-            )
+            max_degree = len(df) - 1
         df = df.reset_index(drop=True)
         x = df.index.values.reshape(-1, 1)
         y = df[on_column].values

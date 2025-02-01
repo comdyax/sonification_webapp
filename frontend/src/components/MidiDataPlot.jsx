@@ -17,21 +17,25 @@ const MIDIDataPlot = ({ midiData }) => {
   const data = useMemo(() => {
     let data = [];
     let usedColors = [];
-    const durations = midiData.map((data) => data.duration);
+    const durations = [0].concat(midiData.map((data) => data.duration));
     const xAxis = durations.reduce((acc, curr, index) => {
       acc.push((acc[index - 1] || 0) + curr);
       return acc;
     }, []);
 
-    if (midiData[0].chord) {
+    if ("chord" in midiData[0]) {
       for (let idx = 0; idx < midiData[0].chord.length; idx++) {
         const color = getRandomColor(usedColors);
-        const yAxisMidi = midiData.map((data) => data.chord[idx]);
+        const lastItem = midiData[midiData.length - 1].chord[idx];
+        const yAxisMidi = midiData
+          .map((data) => data.chord[idx])
+          .concat(lastItem);
         data.push({
           x: xAxis,
           y: yAxisMidi,
           type: "scatter",
           mode: "lines+markers",
+          line: { shape: "hv" },
           name: `chord note ${idx + 1}`,
           marker: { color: color },
         });
@@ -39,43 +43,54 @@ const MIDIDataPlot = ({ midiData }) => {
       }
     }
 
-    if (midiData[0].note) {
+    if ("note" in midiData[0]) {
       const color = getRandomColor(usedColors);
-      const yAxisMidi = midiData.map((data) => data.note);
+      const lastItem = midiData[midiData.length - 1].note;
+      const yAxisMidi = midiData.map((data) => data.note).concat(lastItem);
       data.push({
         x: xAxis,
         y: yAxisMidi,
         type: "scatter",
         mode: "lines+markers",
+        line: { shape: "hv" },
         name: "notes",
         marker: { color: color },
       });
       usedColors.push(color);
     }
 
-    if (midiData[0].cc_message) {
+    if ("cc_message" in midiData[0]) {
       const color = getRandomColor(usedColors);
-      const yAxisMidi = midiData.map((data) => data.cc_message);
+      const lastItem = midiData[midiData.length - 1].cc_message;
+      const yAxisMidi = midiData
+        .map((data) => data.cc_message)
+        .concat(lastItem);
       data.push({
         x: xAxis,
         y: yAxisMidi,
         type: "scatter",
         mode: "lines+markers",
+        line: { shape: "hv" },
         name: "cc values",
         marker: { color: color },
       });
       usedColors.push(color);
     }
 
-    if (midiData[0].velocity) {
-      const yAxisVelocity = midiData.map((data) => data.velocity);
+    if ("velocity" in midiData[0]) {
+      const color = getRandomColor(usedColors);
+      const lastItem = midiData[midiData.length - 1].velocity;
+      const yAxisVelocity = midiData
+        .map((data) => data.velocity)
+        .concat(lastItem);
       data.push({
         x: xAxis,
         y: yAxisVelocity,
         type: "scatter",
         mode: "lines+markers",
+        line: { shape: "hv" },
         name: "midi velocity",
-        marker: { color: "blue" },
+        marker: { color: color },
       });
     }
     return data;
@@ -85,7 +100,7 @@ const MIDIDataPlot = ({ midiData }) => {
   const [plotDataType, setPlotDataType] = useState("value");
 
   useEffect(() => {
-    if (midiData[0].cc_message) {
+    if ("cc_message" in midiData[0]) {
       setPlotData(data);
     } else {
       setPlotData(data.slice(0, -1));
@@ -112,7 +127,7 @@ const MIDIDataPlot = ({ midiData }) => {
           <Modal.Header closeButton>
             <Modal.Title>Midi Data Plot</Modal.Title>
             <Modal.Title className="position-absolute top-1 start-50 translate-middle-x">
-              {!midiData[0].cc_message && (
+              {!("cc_message" in midiData[0]) && (
                 <Form.Select
                   aria-label="Select Type"
                   value={plotDataType}
@@ -136,7 +151,7 @@ const MIDIDataPlot = ({ midiData }) => {
                     window.innerWidth > window.innerHeight
                       ? window.innerHeight * 0.7
                       : window.innerHeight * 0.6,
-                  xaxis: { title: "Duration" },
+                  xaxis: { title: "Time" },
                   yaxis: { title: "Midi Value" },
                   legend: {
                     orientation: "h",
