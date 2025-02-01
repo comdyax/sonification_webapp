@@ -5,7 +5,16 @@ import environmentData from "../services/environmentData";
 import { weatherDataMapping, intervalMapping } from "../config";
 
 import statisticalData from "../services/statisticalData";
-import { Container, Row, Col, InputGroup, Form, Button } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  InputGroup,
+  Form,
+  Button,
+  ProgressBar,
+  Modal,
+} from "react-bootstrap";
 import WeatherPlot from "./WeatherPlot";
 import WeatherTable from "./WeatherTable";
 
@@ -45,8 +54,12 @@ const PlotWeather = () => {
   const [summaryStatsMedian, setSummaryStatsMedian] = useState(false);
   const [summaryStatsMax, setSummaryStatsMax] = useState(false);
 
+  const [select, setSelect] = useState(true);
+  const [isFetching, setIsFetching] = useState(null);
+
   const fetchData = async () => {
     try {
+      setIsFetching(5);
       const newPlotData = [];
       let envData = [];
       const response = await environmentData.getWeatherData(
@@ -84,7 +97,7 @@ const PlotWeather = () => {
         "distanceBefore",
         await statisticalData.getDistanceToBefore(duration, envData)
       );
-
+      setIsFetching(15);
       if (polyFit) {
         const response = await statisticalData.getPolynomialFit(
           duration,
@@ -116,7 +129,7 @@ const PlotWeather = () => {
         removeData("polyFit");
         removeData("polyFitDev");
       }
-
+      setIsFetching(30);
       if (rollingWindow) {
         const response = await statisticalData.getRollingAvg(
           duration,
@@ -146,7 +159,7 @@ const PlotWeather = () => {
         removeData("rollingAvg");
         removeData("rollingAvgDev");
       }
-
+      setIsFetching(45);
       if (summaryStatsMin) {
         const response = await statisticalData.getSummaryStat(
           duration,
@@ -178,7 +191,7 @@ const PlotWeather = () => {
         removeData("summaryStatsMin");
         removeData("minDev");
       }
-
+      setIsFetching(60);
       if (summaryStatsMean) {
         const response = await statisticalData.getSummaryStat(
           duration,
@@ -210,6 +223,7 @@ const PlotWeather = () => {
         removeData("summaryStatsMean");
         removeData("meanDev");
       }
+      setIsFetching(75);
       if (summaryStatsMedian) {
         const response = await statisticalData.getSummaryStat(
           duration,
@@ -241,6 +255,7 @@ const PlotWeather = () => {
         removeData("summaryStatsMedian");
         removeData("medianDev");
       }
+      setIsFetching(90);
       if (summaryStatsMax) {
         const response = await statisticalData.getSummaryStat(
           duration,
@@ -272,181 +287,221 @@ const PlotWeather = () => {
         removeData("summaryStatsMax");
         removeData("maxDev");
       }
-
+      setIsFetching(100);
       setPlotData(newPlotData);
       setWeatherData(envData);
+      setSelect(false);
+      setTimeout(() => setIsFetching(null), 800);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
   return (
-    <Container fluid>
-      <Container fluid>
-        <Row>
-          <Col>
-            <InputGroup className="mb-3">
-              <InputGroup.Text id="start_date">Start Date:</InputGroup.Text>
-              <Form.Control
-                type="date"
-                value={startDate}
-                aria-label="start-date"
-                onChange={(e) => setStartDate(e.target.value)}
+    <Container style={{ maxWidth: "915px" }}>
+      <Row>
+        <Col>
+          <InputGroup className="mb-3">
+            <InputGroup.Text id="start_date">Start Date:</InputGroup.Text>
+            <Form.Control
+              type="date"
+              value={startDate}
+              aria-label="start-date"
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setSelect(true);
+              }}
+            />
+          </InputGroup>
+        </Col>
+        <Col>
+          <InputGroup className="mb-3">
+            <InputGroup.Text id="end_date">End Date:</InputGroup.Text>
+            <Form.Control
+              type="date"
+              value={endDate}
+              aria-label="start-date"
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setSelect(true);
+              }}
+            />
+          </InputGroup>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <InputGroup className="mb-3">
+            <InputGroup.Text id="lat">Latitude:</InputGroup.Text>
+            <Form.Control
+              placeholder={latitude}
+              value={latitude}
+              step="0.1"
+              type="number"
+              onChange={(e) => {
+                setLatitude(e.target.value);
+                setSelect(true);
+              }}
+            />
+          </InputGroup>
+        </Col>
+        <Col>
+          <InputGroup className="mb-3">
+            <InputGroup.Text id="lon">Longitude:</InputGroup.Text>
+            <Form.Control
+              placeholder={longitude}
+              value={longitude}
+              step="0.1"
+              type="number"
+              onChange={(e) => {
+                setLongitude(e.target.value);
+                setSelect(true);
+              }}
+            />
+          </InputGroup>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <InputGroup className="mb-3">
+            <InputGroup.Text id="interval">Interval:</InputGroup.Text>
+            <Form.Select
+              value={interval}
+              onChange={(e) => {
+                setInterval(e.target.value);
+                setSelect(true);
+              }}
+            >
+              {Object.keys(intervalMapping).map((t) => (
+                <option key={t} value={t}>
+                  {intervalMapping[t]}
+                </option>
+              ))}
+            </Form.Select>
+          </InputGroup>
+        </Col>
+        <Col>
+          <InputGroup className="mb-3">
+            <InputGroup.Text id="data-type">Data Type:</InputGroup.Text>
+            <Form.Select
+              value={dataType}
+              onChange={(e) => {
+                setDataType(e.target.value);
+                setSelect(true);
+              }}
+            >
+              {Object.keys(weatherDataMapping).map((t) => (
+                <option key={t} value={t}>
+                  {weatherDataMapping[t]}
+                </option>
+              ))}
+            </Form.Select>
+          </InputGroup>
+        </Col>
+      </Row>
+      <h3>Add Statistix</h3>
+      <Row>
+        <Col>
+          <InputGroup className="mb-3">
+            <InputGroup.Text id="poly-fit">Polynomial Fit:</InputGroup.Text>
+            <InputGroup.Checkbox
+              onChange={() => {
+                setPolyFit(!polyFit);
+                setSelect(true);
+              }}
+            />
+            <InputGroup.Text>Degree (Default Best Fit):</InputGroup.Text>
+            <Form.Control
+              placeholder={polyDegree}
+              onChange={(e) => {
+                setPolyDegree(e.target.value);
+                setSelect(true);
+              }}
+            />
+          </InputGroup>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <InputGroup className="mb-3">
+            <InputGroup.Text id="rolling-avg">
+              Rolling Window Avg:
+            </InputGroup.Text>
+            <InputGroup.Checkbox
+              onChange={() => {
+                setRollingWindow(!rollingWindow);
+                setSelect(true);
+              }}
+            />
+            <InputGroup.Text>Window Size:</InputGroup.Text>
+            <Form.Control
+              placeholder={windowSize}
+              onChange={(e) => {
+                setWindowSize(e.target.value);
+                setSelect(true);
+              }}
+            />
+          </InputGroup>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <InputGroup className="mb-3 d-flex flex-column">
+            <InputGroup.Text>
+              <Form.Check
+                className="mx-auto"
+                inline
+                type="checkbox"
+                id="min"
+                label="Minimum"
+                onChange={() => {
+                  setSummaryStatsMin(!summaryStatsMin);
+                  setSelect(true);
+                }}
               />
-            </InputGroup>
-          </Col>
-          <Col>
-            <InputGroup className="mb-3">
-              <InputGroup.Text id="end_date">End Date:</InputGroup.Text>
-              <Form.Control
-                type="date"
-                value={endDate}
-                aria-label="start-date"
-                onChange={(e) => setEndDate(e.target.value)}
+              <Form.Check
+                className="mx-auto"
+                inline
+                type="checkbox"
+                id="mean"
+                label="Mean"
+                onChange={() => {
+                  setSummaryStatsMean(!summaryStatsMean);
+                  setSelect(true);
+                }}
               />
-            </InputGroup>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <InputGroup className="mb-3">
-              <InputGroup.Text id="lat">Latitude:</InputGroup.Text>
-              <Form.Control
-                placeholder={latitude}
-                value={latitude}
-                step="0.1"
-                type="number"
-                onChange={(e) => setLatitude(e.target.value)}
+              <Form.Check
+                className="mx-auto"
+                inline
+                type="checkbox"
+                id="median"
+                label="Median"
+                onChange={() => {
+                  setSummaryStatsMedian(!summaryStatsMedian);
+                  setSelect(true);
+                }}
               />
-            </InputGroup>
-          </Col>
-          <Col>
-            <InputGroup className="mb-3">
-              <InputGroup.Text id="lon">Longitude:</InputGroup.Text>
-              <Form.Control
-                placeholder={longitude}
-                value={longitude}
-                step="0.1"
-                type="number"
-                onChange={(e) => setLongitude(e.target.value)}
+              <Form.Check
+                className="mx-auto"
+                inline
+                type="checkbox"
+                id="max"
+                label="Max"
+                onChange={() => {
+                  setSummaryStatsMax(!summaryStatsMax);
+                  setSelect(true);
+                }}
               />
-            </InputGroup>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <InputGroup className="mb-3">
-              <InputGroup.Text id="interval">Interval:</InputGroup.Text>
-              <Form.Select
-                value={interval}
-                onChange={(e) => setInterval(e.target.value)}
-              >
-                {Object.keys(intervalMapping).map((t) => (
-                  <option key={t} value={t}>
-                    {intervalMapping[t]}
-                  </option>
-                ))}
-              </Form.Select>
-            </InputGroup>
-          </Col>
-          <Col>
-            <InputGroup className="mb-3">
-              <InputGroup.Text id="data-type">Data Type:</InputGroup.Text>
-              <Form.Select
-                value={dataType}
-                onChange={(e) => setDataType(e.target.value)}
-              >
-                {Object.keys(weatherDataMapping).map((t) => (
-                  <option key={t} value={t}>
-                    {weatherDataMapping[t]}
-                  </option>
-                ))}
-              </Form.Select>
-            </InputGroup>
-          </Col>
-        </Row>
-      </Container>
-      {weatherData.length > 0 && (
-        <Container fluid>
-          <h2>Add Statistix</h2>
-          <Row>
-            <Col>
-              <InputGroup className="mb-3">
-                <InputGroup.Text id="poly-fit">Polynomial Fit:</InputGroup.Text>
-                <InputGroup.Checkbox onChange={() => setPolyFit(!polyFit)} />
-                <InputGroup.Text>Degree (Default Best Fit):</InputGroup.Text>
-                <Form.Control
-                  placeholder={polyDegree}
-                  onChange={(e) => setPolyDegree(e.target.value)}
-                />
-              </InputGroup>
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              <InputGroup className="mb-3">
-                <InputGroup.Text id="rolling-avg">
-                  Rolling Window Avg:
-                </InputGroup.Text>
-                <InputGroup.Checkbox
-                  onChange={() => setRollingWindow(!rollingWindow)}
-                />
-                <InputGroup.Text>Window Size:</InputGroup.Text>
-                <Form.Control
-                  placeholder={windowSize}
-                  onChange={(e) => setWindowSize(e.target.value)}
-                />
-              </InputGroup>
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              <InputGroup className="mb-3 d-flex flex-column">
-                <InputGroup.Text>
-                  <Form.Check
-                    className="mx-auto"
-                    inline
-                    type="checkbox"
-                    id="min"
-                    label="Minimum"
-                    onChange={() => setSummaryStatsMin(!summaryStatsMin)}
-                  />
-                  <Form.Check
-                    className="mx-auto"
-                    inline
-                    type="checkbox"
-                    id="mean"
-                    label="Mean"
-                    onChange={() => setSummaryStatsMean(!summaryStatsMean)}
-                  />
-                  <Form.Check
-                    className="mx-auto"
-                    inline
-                    type="checkbox"
-                    id="median"
-                    label="Median"
-                    onChange={() => setSummaryStatsMedian(!summaryStatsMedian)}
-                  />
-                  <Form.Check
-                    className="mx-auto"
-                    inline
-                    type="checkbox"
-                    id="max"
-                    label="Max"
-                    onChange={() => setSummaryStatsMax(!summaryStatsMax)}
-                  />
-                </InputGroup.Text>
-              </InputGroup>
-            </Col>
-          </Row>
-        </Container>
-      )}
+            </InputGroup.Text>
+          </InputGroup>
+        </Col>
+      </Row>
       <Row>
         <Col>
           <Button
             className="m-3"
             size="lg"
-            variant="dark"
+            variant={select ? "secondary" : "dark"}
             onClick={() => fetchData()}
           >
             {plotData.length === 0 ? "Fetch Data" : "Update Data"}
@@ -466,6 +521,11 @@ const PlotWeather = () => {
           </>
         )}
       </Row>
+      <Modal show={isFetching} centered backdrop="static">
+        <Modal.Body>
+          <ProgressBar now={isFetching} />
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 };

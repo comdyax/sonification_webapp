@@ -3,10 +3,10 @@ import { Button, Container, Modal, Table } from "react-bootstrap";
 import { useState } from "react";
 
 const WeatherTable = ({ data }) => {
-  const timeColumn = data[0].x;
+  const timeColumn = data[0].x.map((d) => new Date(d).toLocaleString());
   const numOfRows = timeColumn.length;
   const columnNames = ["Timestamp"].concat(data.map((col) => col.name));
-  const columnValues = [data[0].x].concat(data.map((col) => col.y));
+  const columnValues = [timeColumn].concat(data.map((col) => col.y));
 
   const [open, setOpen] = useState(false);
 
