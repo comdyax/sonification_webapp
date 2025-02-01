@@ -48,7 +48,7 @@ def get_historical_data(
     data_field: Optional[str] = "temperature_2m",
     start_date: Optional[datetime.date] = settings.START_DATE,
     end_date: Optional[datetime.date] = settings.END_DATE,
-    interval: Optional[str] = "hourly",
+    interval: Optional[str] = "1h",
 ) -> pd.DataFrame:
     """
     fetches historical sensor data from API for given parameters and returns dataframe.
@@ -69,15 +69,21 @@ def get_historical_data(
         "longitude": lon,
         "start_date": start_date,
         "end_date": end_date,
-        interval: data_field,
+        "hourly": data_field,
     }
     response = requests.get(url=base_url, params=params)
     assert response.status_code == 200
     data = response.json()
-    data = data[interval]
+    data = data["hourly"]
     df = pd.DataFrame(data)
     df["time"] = pd.to_datetime(df["time"])
     df = df[df["time"] <= datetime.datetime.now()]
     df = df.dropna()
     df = df.rename(columns={data_field: "value"})
+    if interval and (interval != "h"):
+        df = (
+            df.groupby(pd.Grouper(key="time", freq=interval, origin=df["time"].min()))
+            .agg(value=("value", "mean"))
+            .reset_index()
+        )
     return df

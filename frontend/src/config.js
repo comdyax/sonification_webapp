@@ -28,10 +28,10 @@ export const chordTypes = {
 };
 
 export const intervalMapping = {
-  hour: "Hour",
-  day: "Day",
-  month: "Month",
-  year: "Year",
+  h: "hour",
+  D: "day",
+  MS: "month",
+  YS: "year",
 };
 
 export const noteMappingStrategies = {

@@ -67,7 +67,8 @@ const PlotWeather = () => {
         endDate,
         latitude,
         longitude,
-        dataType
+        dataType,
+        interval
       );
       const tmp = {
         time: Array.from(

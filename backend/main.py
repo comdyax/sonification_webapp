@@ -75,6 +75,7 @@ async def get_weather_data(
     start_date: Optional[datetime.date] = settings.START_DATE,
     end_date: Optional[datetime.date] = settings.END_DATE,
     data_field: DataFields = Query(DataFields.temperature_2m),
+    interval: str = "h",
 ):
     """
     Fetch historical weather data for a specified location and date range.
@@ -85,6 +86,7 @@ async def get_weather_data(
         start_date (datetime.date, optional): Start date for the data range. Defaults to settings.START_DATE.
         end_date (datetime.date, optional): End date for the data range. Defaults to settings.END_DATE.
         data_field (DataFields): The type of weather data to fetch.
+        interval (str): of aggregation
 
     Returns:
         Data: A dictionary with lists of weather data.
@@ -95,6 +97,7 @@ async def get_weather_data(
         data_field=data_field,
         start_date=start_date,
         end_date=end_date,
+        interval=interval,
     )
     return df.to_dict(orient="list")
 
