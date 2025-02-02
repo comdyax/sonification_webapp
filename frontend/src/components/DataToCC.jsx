@@ -116,7 +116,7 @@ const DataToCC = ({ index, onRemove }) => {
               aria-label="duration-cc"
               onChange={(e) => setDataDuration(e.target.value)}
             >
-              <option>--opt. add data--</option>
+              <option value={dataTypes[0]}>--opt. add data--</option>
               {dataTypes.map((t) => (
                 <option key={t} value={t}>
                   {dataTextMapping[t]}

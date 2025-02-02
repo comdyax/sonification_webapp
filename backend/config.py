@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     LONGITUDE: float = 8.01
     LATITUDE: float = 50.12
     TIMEZONE: str = "CET"
-    END_DATE: date = datetime.now(tz=pytz.timezone(TIMEZONE)).date() -timedelta(days=1)
+    END_DATE: date = datetime.now(tz=pytz.timezone(TIMEZONE)).date() - timedelta(days=1)
     START_DATE: date = END_DATE - timedelta(days=1)
     WINDOW_SIZE: int = 5
     DURATION: int = 300

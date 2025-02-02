@@ -3,6 +3,7 @@ This module contains functions for DataFrame operations to add midi values
 based on a column as a new column and return the DataFrame.
 """
 
+import math
 import random
 from typing import List
 import numpy as np
@@ -229,10 +230,18 @@ def set_durations(
         pd.DataFrame: Dataframe with duration per row (MIDI event)
     """
     with validate_dataframe(df, on_column, to_column, expected_type=[float, int]):
-        minimum = abs(df[on_column].min()) + 1
-        df[on_column] = df[on_column] + minimum
-        proportions = df[on_column] / df[on_column].sum()
-        df[to_column] = proportions * duration
+        if df[on_column].nunique() == 1:
+            equal_duration = duration / len(df)
+            df[to_column] = equal_duration
+
+        else:
+            minimum = abs(df[on_column].min()) + 1
+            df[on_column] = df[on_column] + minimum
+            proportions = df[on_column] / df[on_column].sum()
+            df[to_column] = proportions * duration
+        current_sum = df[to_column].sum()
+        difference = duration - current_sum
+        df[to_column].iat[-1] += difference
         return df
 
 
@@ -299,22 +308,33 @@ def interpolate_for_custom_interval(
         pd.DataFrame: New Dataframe with interpolated MIDI events.
     """
     with validate_dataframe(df, on_column, duration_column, expected_type=[float, int]):
-        df_custom = df.copy().reset_index(drop=True)
-        df_custom["lin_time"] = np.linspace(
-            start=0, stop=duration_s, num=len(df)
-        ).astype(int)
-        custom_durations = pd.DataFrame(
-            {"lin_time": np.arange(start=0, stop=duration_s, step=custom_duration_s)}
-        )
-        merge_type = "right" if len(custom_durations) <= len(df_custom) else "outer"
-        df_custom = pd.merge(
-            left=df_custom, right=custom_durations, on="lin_time", how=merge_type
-        )
-        df_custom[on_column] = (
-            df_custom[on_column].interpolate(method="linear").astype(int)
-        )
-        df_custom[duration_column] = custom_duration_s
-        return df_custom
+        if (custom_duration_s >= duration_s) or custom_duration_s <= 0:
+            return pd.DataFrame(
+                {on_column: [int(df[on_column].mean())], duration_column: [duration_s]}
+            )
+
+        new_row_num = duration_s // custom_duration_s
+        if new_row_num < len(df):
+            df = df.reset_index(drop=True)
+            df["group"] = np.repeat(range(new_row_num), len(df) // new_row_num + 1)[
+                : len(df)
+            ]
+            df = df.groupby("group").mean().astype(int)
+            df[duration_column] = custom_duration_s
+        else:
+            df = df.set_index(
+                np.linspace(start=0, stop=duration_s, num=len(df)).astype(int)
+            )
+            new_index = np.linspace(start=0, stop=duration_s, num=new_row_num).astype(
+                int
+            )
+            df = df.reindex(new_index).interpolate()
+            df[on_column] = df[on_column].astype(int)
+            df[duration_column] = custom_duration_s
+        df = df[[on_column, duration_column]]
+        difference = duration_s - df[duration_column].sum()
+        df[duration_column].iat[-1] = df[duration_column].iat[-1] + difference
+        return df
 
 
 def set_notes_to_drone(

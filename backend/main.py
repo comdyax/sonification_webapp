@@ -51,7 +51,7 @@ from schemas import (
     StatisticDataPoly,
 )
 
-app = FastAPI(openapi_prefix="/api")
+app = FastAPI(root_path="/api")
 
 tag_base = "base"
 tag_stat = "statistical data"
@@ -99,6 +99,7 @@ async def get_weather_data(
         end_date=end_date,
         interval=interval,
     )
+    df = df.round(1)
     return df.to_dict(orient="list")
 
 
@@ -388,7 +389,6 @@ async def get_midi_notes_data(
         to_column="note",
         start_midi_value=start_midi_notes,
     )
-    df = df.round(1)
     return df.to_dict(orient="records")
 
 
@@ -465,7 +465,6 @@ async def get_midi_chords_data(
     else:
         raise HTTPException(status_code=422, detail="chord type invalid")
     df = permutate_chords(df=df, seed_column="value_chords", chord_column="chord")
-    df = df.round(1)
     return df.to_dict(orient="records")
 
 
@@ -518,7 +517,6 @@ async def get_midi_drone_data(
         duration_column_name="duration",
         aggregation_types=drone_build_options,
     )
-    df = df.round(1)
     result = {"chord": df.loc[0, "chord"], "velocity": 100, "duration": duration_s}
     return result
 
@@ -577,8 +575,7 @@ async def get_midi_cc_data(
         midi_max=midi_max,
         reverse=mapping_reversed,
     )
-
-    if not duration_per_cc_value:
+    if duration_per_cc_value is None:
         df = set_durations(
             df=df, on_column="duration_cc", to_column="duration", duration=duration_s
         )
@@ -590,5 +587,4 @@ async def get_midi_cc_data(
             custom_duration_s=duration_per_cc_value,
             duration_s=duration_s,
         )
-    df = df.round(1)
     return df.to_dict(orient="records")
