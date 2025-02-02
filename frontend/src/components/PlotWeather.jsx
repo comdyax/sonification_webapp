@@ -32,9 +32,9 @@ const PlotWeather = () => {
   const [dataType, setDataType] = useState(Object.keys(weatherDataMapping)[0]);
   const [interval, setInterval] = useState(Object.keys(intervalMapping)[0]);
 
-  const [plotData, setPlotData] = useState([]);
-
   const {
+    plotData,
+    setPlotData,
     weatherData,
     setWeatherData,
     updateData,

@@ -1,6 +1,8 @@
 import { useState, useEffect, useContext, useRef } from "react";
 import { MIDIContext } from "../contexts/MidiContext";
 import { Container, Button, Modal, Form, Row, Col } from "react-bootstrap";
+import WeatherPlot from "./WeatherPlot";
+import { DataContext } from "../contexts/DataContext";
 
 const MidiController = () => {
   const [open, setOpen] = useState(false);
@@ -8,7 +10,7 @@ const MidiController = () => {
   const [outputDevices, setOutputDevices] = useState([]);
   const [selectedOutput, setSelectedOutput] = useState(null);
   const { midiData, ccData } = useContext(MIDIContext);
-
+  const { plotData } = useContext(DataContext);
   const [isPlaying, setIsPlaying] = useState(false);
   const isPlayingRef = useRef(false);
 
@@ -195,6 +197,7 @@ const MidiController = () => {
             </Container>
           </Modal.Body>
           <Modal.Footer>
+            <WeatherPlot plotData={plotData} plotName="weather data" />
             <Button variant="secondary" size="lg" onClick={handleClose}>
               Close
             </Button>

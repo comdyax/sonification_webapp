@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { DataContext } from "./DataContext";
 
 export const DataProvider = ({ children }) => {
+  const [plotData, setPlotData] = useState([]);
   const [weatherData, setWeatherData] = useState([]);
   const [data, setData] = useState({});
   const [polyDegree, setPolyDegree] = useState("");
@@ -38,6 +39,8 @@ export const DataProvider = ({ children }) => {
   return (
     <DataContext.Provider
       value={{
+        plotData,
+        setPlotData,
         weatherData,
         setWeatherData,
         updateData,
