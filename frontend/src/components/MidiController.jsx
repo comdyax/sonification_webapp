@@ -11,7 +11,6 @@ const MidiController = () => {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const isPlayingRef = useRef(false);
-  const loopRef = useRef(false);
 
   useEffect(() => {
     navigator
@@ -51,7 +50,6 @@ const MidiController = () => {
     const hasChord = "chord" in firstEntry;
 
     if (selectedOutput) {
-      isPlayingRef.current = true;
       do {
         if (hasNote) {
           for (const { note, velocity, duration } of midi) {
@@ -80,8 +78,7 @@ const MidiController = () => {
             await new Promise((resolve) => setTimeout(resolve, 1));
           }
         }
-      } while (loopRef.current);
-      isPlayingRef.current = false;
+      } while (isPlayingRef.current);
     } else {
       console.error("No MIDI device selected");
     }
@@ -89,12 +86,9 @@ const MidiController = () => {
 
   const stopNotes = () => {
     if (selectedOutput) {
-      do {
-        for (let m = 0; m < 128; m++) {
-          sendNoteOff(selectedOutput, m, false);
-        }
-      } while (loopRef.current);
-      isPlayingRef.current = false;
+      for (let m = 0; m < 128; m++) {
+        sendNoteOff(selectedOutput, m, false);
+      }
       console.log("Playback stopped");
     }
   };
@@ -113,11 +107,11 @@ const MidiController = () => {
   const togglePlayback = async () => {
     if (isPlayingRef.current) {
       isPlayingRef.current = false;
-      loopRef.current = false;
       setIsPlaying(false);
       stopNotes();
       console.log("stopping");
     } else {
+      isPlayingRef.current = true;
       setIsPlaying(true);
       const ccDataArray = Object.values(ccData);
       const midiDataArray = Object.values(midiData);
@@ -141,9 +135,6 @@ const MidiController = () => {
     }
   };
 
-  const handleLoopSwitch = () => {
-    loopRef.current = !loopRef.current;
-  };
   const handleShow = () => setOpen(true);
 
   return (
@@ -192,17 +183,6 @@ const MidiController = () => {
                         </option>
                       ))}
                   </Form.Select>
-                </Col>
-              </Row>
-              <Row>
-                <Col className="d-flex justify-content-center m-1">
-                  <Form.Check
-                    type="switch"
-                    id="loop-switch"
-                    label="loop soundscape"
-                    defaultChecked={loopRef.current}
-                    onChange={() => handleLoopSwitch()}
-                  />
                 </Col>
               </Row>
               <Row>

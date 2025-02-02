@@ -195,13 +195,8 @@ async def get_polynomial_fit_data(
             status_code=400, detail="List too large, maximum size is 1000."
         )
     df = pd.DataFrame({"time": np.linspace(0, duration_s, len(data)), "value": data})
-    if degree is None:
+    if (degree is None) or (degree >= len(df)):
         degree = find_best_polynomial_fit(df=df, on_column="value")[2]
-    elif degree >= len(df):
-        raise HTTPException(
-            status_code=422,
-            detail="the degree must not be larger than number of datapoints - 1.",
-        )
     if not deviation:
         df = add_polynomial_fit(
             df=df, on_column="value", to_column="value", degree=degree

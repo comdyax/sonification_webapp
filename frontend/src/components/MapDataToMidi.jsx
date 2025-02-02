@@ -8,6 +8,7 @@ import Form from "react-bootstrap/Form";
 import { noteMappingStrategies } from "../config";
 import { Container, Button, Row, Col } from "react-bootstrap";
 import MidiController from "./MidiController";
+import CreateMidiFile from "./CreateMidiFile";
 
 const MapDataToMidi = () => {
   const { weatherData } = useContext(DataContext);
@@ -75,9 +76,14 @@ const MapDataToMidi = () => {
           </Row>
           <Row>
             {Object.keys(midiComponents).length > 0 && (
-              <Col>
-                <MidiController />
-              </Col>
+              <>
+                <Col>
+                  <MidiController />
+                </Col>
+                <Col>
+                  <CreateMidiFile />
+                </Col>
+              </>
             )}
             <Col>
               <Button

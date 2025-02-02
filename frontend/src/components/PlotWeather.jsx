@@ -414,6 +414,7 @@ const PlotWeather = () => {
             <InputGroup.Text>Degree (Default Best Fit):</InputGroup.Text>
             <Form.Control
               placeholder={polyDegree}
+              value={polyDegree}
               onChange={(e) => {
                 setPolyDegree(e.target.value);
                 setSelect(true);
