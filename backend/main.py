@@ -473,12 +473,6 @@ async def get_midi_drone_data(
     request: MidiDroneRequest,
     duration_s: int = settings.DURATION,
     start_midi_notes: int = settings.LOWEST_MIDI_NOTE,
-    drone_build_options: List[MidiDroneBuildOptions] = Query(
-        default=[
-            MidiDroneBuildOptions.min,
-            MidiDroneBuildOptions.median,
-        ]
-    ),
 ):
     """
     Map data to a MIDI drone using specified aggregation options.
@@ -487,11 +481,11 @@ async def get_midi_drone_data(
         request (MidiDroneRequest): Request object containing the input data.
         duration_s (int): Duration of the dataset in seconds. Defaults to settings.DURATION.
         start_midi_notes (int): Lowest MIDI note value. Defaults to settings.LOWEST_MIDI_NOTE.
-        drone_build_options (List[MidiDroneBuildOptions]): Aggregation options for building the drone. Defaults to [min, median].
 
     Returns:
         MidiDrone: MIDI drone data with chords, velocity, and duration.
     """
+    drone_build_options = request.drone_build_options
     data_drone = request.data_for_drone
     df = pd.DataFrame(
         {

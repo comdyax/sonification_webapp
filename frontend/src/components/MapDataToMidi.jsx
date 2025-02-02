@@ -9,6 +9,7 @@ import { noteMappingStrategies } from "../config";
 import { Container, Button, Row, Col } from "react-bootstrap";
 import MidiController from "./MidiController";
 import CreateMidiFile from "./CreateMidiFile";
+import DataToDrone from "./DataToDrone";
 
 const MapDataToMidi = () => {
   const { weatherData } = useContext(DataContext);
@@ -39,6 +40,7 @@ const MapDataToMidi = () => {
     notes: DataToNotes,
     chords: DataToChords,
     cc: DataToCC,
+    drone: DataToDrone,
   };
 
   return (

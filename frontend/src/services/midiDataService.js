@@ -63,15 +63,16 @@ const getMidiToChords = async (
 const getMidiToDrone = async (duration, startMidi, droneBuildOptions, data) => {
   const body = {
     data_for_drone: data,
+    drone_build_options: droneBuildOptions,
   };
 
   const request = await axios.post(`${baseUrl}/map_data_to_midi_drone`, body, {
     params: {
       duration_s: duration,
       start_midi_notes: startMidi,
-      drone_build_options: droneBuildOptions,
     },
   });
+
   return request.data;
 };
 

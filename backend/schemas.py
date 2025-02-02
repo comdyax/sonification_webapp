@@ -48,6 +48,13 @@ class MidiChordsRequest(BaseModel):
 
 class MidiDroneRequest(BaseModel):
     data_for_drone: List[float] = Field(..., max_items=1000)
+    drone_build_options: List[str] = Field(
+        default=[
+            MidiDroneBuildOptions.min,
+            MidiDroneBuildOptions.median,
+        ],
+        max_items=4,
+    )
 
 
 class MidiCCRequest(BaseModel):
