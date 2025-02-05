@@ -7,6 +7,7 @@ import datetime
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import numpy as np
 import pandas as pd
 
@@ -57,7 +58,7 @@ tag_base = "base"
 tag_stat = "statistical data"
 tag_midi = "midi data"
 
-origins = ["http://localhost", "http://localhost:5173"]
+origins = ["http://localhost:8000", "http://localhost:5173"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -577,3 +578,6 @@ async def get_midi_cc_data(
             duration_s=duration_s,
         )
     return df.to_dict(orient="records")
+
+
+app.mount("/", StaticFiles(directory="dist/", html=True), name="dist")
