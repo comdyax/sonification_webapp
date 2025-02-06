@@ -142,7 +142,7 @@ const MidiController = () => {
   return (
     <Container fluid className="m-5">
       <Button size="lg" onClick={handleShow} className="mb-2" variant="dark">
-        {open ? "Close Midi Controller" : "Open Midi Controller"}
+        {open ? "Close" : "To Midi Device"}
       </Button>
       <div>
         <Modal

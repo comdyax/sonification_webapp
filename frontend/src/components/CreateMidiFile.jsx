@@ -64,7 +64,7 @@ const CreateMidiFile = () => {
 
   return (
     <Button className="m-5" variant="dark" size="lg" onClick={createFile}>
-      Create Midi File
+    To Midi File
     </Button>
   );
 };

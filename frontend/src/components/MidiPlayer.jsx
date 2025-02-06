@@ -1,115 +1,135 @@
-import { useContext, useRef, useState } from "react";
-import * as Tone from "tone";
+import { useState, useEffect, useContext, useRef } from "react";
 import { MIDIContext } from "../contexts/MidiContext";
+import { Container, Button, Modal, Row, Col } from "react-bootstrap";
+import WeatherPlot from "./WeatherPlot";
+import { DataContext } from "../contexts/DataContext";
+import * as Tone from "tone";
 
 const MidiPlayer = () => {
-  const { midiData } = useContext(MIDIContext);
-  const [isPlaying, setIsPlaying] = useState(false); // Track playback state
-  const synthRef = useRef(null); // Use ref to persist the synth instance
-  const timeoutIds = useRef([]); // Store timeouts to stop playback
+  const [open, setOpen] = useState(false);
+  const { midiData, ccData } = useContext(MIDIContext);
+  const { plotData } = useContext(DataContext);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const isPlayingRef = useRef(false);
 
-  const playNotes = async () => {
-    await Tone.start(); // Ensure Tone.js is started
-    if (!synthRef.current) {
-      synthRef.current = new Tone.Synth().toDestination(); // Initialize synth once
+  const synthRef = useRef(new Tone.PolySynth(Tone.Synth).toDestination());
+
+  useEffect(() => {
+    Tone.start();
+  }, []);
+
+  const midiToToneNote = (midiNote) => {
+    return new Tone.Frequency(midiNote, "midi").toNote();
+  };
+
+  const playNotes = async (midi) => {
+    const firstEntry = midi[0];
+    const hasNote = "note" in firstEntry;
+    const hasChord = "chord" in firstEntry;
+
+    if (hasNote) {
+      for (const { note, velocity, duration } of midi) {
+        if (!isPlayingRef.current) break;
+        const toneNote = midiToToneNote(note);
+        synthRef.current.triggerAttackRelease(
+          toneNote,
+          duration,
+          Tone.now(),
+          velocity / 127
+        );
+        await new Promise((resolve) => setTimeout(resolve, duration * 1000));
+      }
+    } else if (hasChord) {
+      for (const { chord, velocity, duration } of midi) {
+        if (!isPlayingRef.current) break;
+        for (const c of chord) {
+          const toneNote = midiToToneNote(c);
+          synthRef.current.triggerAttackRelease(
+            toneNote,
+            duration,
+            Tone.now(),
+            velocity / 127
+          );
+        }
+        await new Promise((resolve) => setTimeout(resolve, duration * 1000));
+      }
     }
-    const synth = synthRef.current;
-
-    let time = Tone.now();
-    midiData.forEach(({ note, velocity, duration }) => {
-      const tone = Tone.Frequency(note, "midi").toNote();
-      const attackTimeout = setTimeout(
-        () => synth.triggerAttack(tone, undefined, velocity),
-        (time - Tone.now()) * 1000
-      );
-      const releaseTimeout = setTimeout(
-        () => synth.triggerRelease(),
-        (time + duration - Tone.now()) * 1000
-      );
-
-      timeoutIds.current.push(attackTimeout, releaseTimeout);
-      time += duration;
-    });
   };
 
   const stopNotes = () => {
-    timeoutIds.current.forEach((id) => clearTimeout(id)); // Clear all scheduled timeouts
-    timeoutIds.current = [];
-    if (synthRef.current) {
-      synthRef.current.triggerRelease(); // Ensure any playing note is stopped
+    synthRef.current.triggerRelease();
+    console.log("Playback stopped");
+  };
+
+  const playCC = async (cc) => {
+    console.log("Control Change data received", cc);
+  };
+
+  const togglePlayback = async () => {
+    if (isPlayingRef.current) {
+      isPlayingRef.current = false;
+      setIsPlaying(false);
+      stopNotes();
+      console.log("Stopping playback");
+    } else {
+      isPlayingRef.current = true;
+      setIsPlaying(true);
+      const midiDataArray = Object.values(midiData);
+      const ccDataArray = Object.values(ccData);
+      console.log("Playing data");
+      await Promise.all([
+        ...midiDataArray.map(playNotes),
+        ...ccDataArray.map(playCC),
+      ]);
     }
   };
 
-  const handleButtonClick = () => {
-    if (isPlaying) {
-      stopNotes(); // Stop the playback
-    } else {
-      playNotes(); // Start the playback
+  const handleClose = () => {
+    setOpen(false);
+    if (isPlayingRef.current) {
+      togglePlayback();
     }
-    setIsPlaying(!isPlaying); // Toggle the playback state
   };
+
+  const handleShow = () => setOpen(true);
 
   return (
-    <div>
-      <button onClick={handleButtonClick}>{isPlaying ? "Stop" : "Play"}</button>
-    </div>
+    <Container fluid className="m-5">
+      <Button size="lg" onClick={handleShow} className="mb-2" variant="dark">
+        {open ? "Close" : "Play Demo"}
+      </Button>
+      <div>
+        <Modal
+          show={open}
+          onHide={handleClose}
+          backdrop="static"
+          keyboard={false}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Midi Controller</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            <Container fluid>
+              <Row>
+                <Col className="d-flex justify-content-center m-4">
+                  <Button onClick={togglePlayback} size="lg" variant="dark">
+                    {isPlaying ? "Stop" : "Play"}
+                  </Button>
+                </Col>
+              </Row>
+            </Container>
+          </Modal.Body>
+          <Modal.Footer>
+            <WeatherPlot plotData={plotData} plotName="weather data" />
+            <Button variant="secondary" size="lg" onClick={handleClose}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
+    </Container>
   );
 };
 
 export default MidiPlayer;
-
-
-// import * as Tone from "tone";
-// const MidiPlayer = () => {
-//   const { midiData } = useContext(MIDIContext);
-//   const [isPlaying, setIsPlaying] = useState(false); // Track playback state
-//   const synthRef = useRef(null); // Use ref to persist the synth instance
-//   const timeoutIds = useRef([]); // Store timeouts to stop playback
-
-//   const playNotes = async () => {
-//     await Tone.start(); // Ensure Tone.js is started
-//     if (!synthRef.current) {
-//       synthRef.current = new Tone.Synth().toDestination(); // Initialize synth once
-//     }
-//     const synth = synthRef.current;
-
-//     let time = Tone.now();
-//     midiData.forEach(({ note, velocity, duration }) => {
-//       const tone = Tone.Frequency(note, "midi").toNote();
-//       const attackTimeout = setTimeout(
-//         () => synth.triggerAttack(tone, undefined, velocity),
-//         (time - Tone.now()) * 1000
-//       );
-//       const releaseTimeout = setTimeout(
-//         () => synth.triggerRelease(),
-//         (time + duration - Tone.now()) * 1000
-//       );
-
-//       timeoutIds.current.push(attackTimeout, releaseTimeout);
-//       time += duration;
-//     });
-//   };
-
-//   const stopNotes = () => {
-//     timeoutIds.current.forEach((id) => clearTimeout(id)); // Clear all scheduled timeouts
-//     timeoutIds.current = [];
-//     if (synthRef.current) {
-//       synthRef.current.triggerRelease(); // Ensure any playing note is stopped
-//     }
-//   };
-
-//   const handleButtonClick = () => {
-//     if (isPlaying) {
-//       stopNotes(); // Stop the playback
-//     } else {
-//       playNotes(); // Start the playback
-//     }
-//     setIsPlaying(!isPlaying); // Toggle the playback state
-//   };
-
-//   return (
-//     <div>
-//       <button onClick={handleButtonClick}>{isPlaying ? "Stop" : "Play"}</button>
-//     </div>
-//   );
-// };

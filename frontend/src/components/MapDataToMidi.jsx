@@ -10,6 +10,7 @@ import { Container, Button, Row, Col } from "react-bootstrap";
 import MidiController from "./MidiController";
 import CreateMidiFile from "./CreateMidiFile";
 import DataToDrone from "./DataToDrone";
+import MidiPlayer from "./MidiPlayer";
 
 const MapDataToMidi = () => {
   const { weatherData } = useContext(DataContext);
@@ -76,28 +77,29 @@ const MapDataToMidi = () => {
               ) : null;
             })}
           </Row>
-          <Row>
-            {Object.keys(midiComponents).length > 0 && (
-              <>
-                <Col>
-                  <MidiController />
-                </Col>
-                <Col>
-                  <CreateMidiFile />
-                </Col>
-              </>
-            )}
-            <Col>
-              <Button
-                className="m-5"
-                variant="dark"
-                size="lg"
-                onClick={() => window.location.reload()}
-              >
-                Reset All
-              </Button>
-            </Col>
-          </Row>
+          {Object.keys(midiComponents).length > 0 && (
+            <Row>
+              <Col>
+                <MidiController />
+              </Col>
+              <Col>
+                <CreateMidiFile />
+              </Col>
+              <Col>
+                <MidiPlayer />
+              </Col>
+              <Col>
+                <Button
+                  className="m-5"
+                  variant="dark"
+                  size="lg"
+                  onClick={() => window.location.reload()}
+                >
+                  Reset All
+                </Button>
+              </Col>
+            </Row>
+          )}
         </Container>
       )}
     </>
