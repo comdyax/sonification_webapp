@@ -7,17 +7,29 @@
 
 #root {
   max-width: 100%;
-  margin: auto;
+  margin: auto 0;
   font-family: PrimaryFont, "Helvetica", sans-serif;
   text-align: center;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
 }
 
 .modal-content, .table {
   font-family: PrimaryFont, "Helvetica", sans-serif !important;
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 2%;
+
+}
+
 h1 {
-  padding: 4%;
+  padding: 2%;
 }
 
 h2 {

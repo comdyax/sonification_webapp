@@ -72,18 +72,22 @@ def get_historical_data(
         "hourly": data_field,
     }
     response = requests.get(url=base_url, params=params)
-    assert response.status_code == 200
-    data = response.json()
-    data = data["hourly"]
-    df = pd.DataFrame(data)
-    df["time"] = pd.to_datetime(df["time"])
-    df = df[df["time"] <= datetime.datetime.now()]
-    df = df.dropna()
-    df = df.rename(columns={data_field: "value"})
-    if interval and (interval != "h"):
-        df = (
-            df.groupby(pd.Grouper(key="time", freq=interval, origin=df["time"].min()))
-            .agg(value=("value", "mean"))
-            .reset_index()
-        )
+    if response.status_code == 200:
+        data = response.json()
+        data = data["hourly"]
+        df = pd.DataFrame(data)
+        df["time"] = pd.to_datetime(df["time"])
+        df = df[df["time"] <= datetime.datetime.now()]
+        df = df.dropna()
+        df = df.rename(columns={data_field: "value"})
+        if interval and (interval != "h"):
+            df = (
+                df.groupby(
+                    pd.Grouper(key="time", freq=interval, origin=df["time"].min())
+                )
+                .agg(value=("value", "mean"))
+                .reset_index()
+            )
+    else:
+        df = pd.read_csv("./backup_data/df.csv")
     return df

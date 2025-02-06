@@ -32,6 +32,8 @@ const PlotWeather = () => {
   const [dataType, setDataType] = useState(Object.keys(weatherDataMapping)[0]);
   const [interval, setInterval] = useState(Object.keys(intervalMapping)[0]);
 
+  const [error, setError] = useState(false);
+
   const {
     plotData,
     setPlotData,
@@ -293,10 +295,30 @@ const PlotWeather = () => {
       setWeatherData(envData);
       setSelect(false);
       setTimeout(() => setIsFetching(null), 800);
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    } catch (exc) {
+      setIsFetching(null);
+      setError(
+        `Error fetching data: Exceeded max length of datapoints. data should not be longer than 1000 points.`
+      );
+      console.error("Error fetching data:", exc);
     }
   };
+
+  if (error) {
+    return (
+      <>
+        <h3>{error}</h3>
+        <Button
+          className="m-2"
+          variant="dark"
+          size="lg"
+          onClick={() => window.location.reload()}
+        >
+          Reset
+        </Button>
+      </>
+    );
+  }
 
   return (
     <Container style={{ maxWidth: "915px" }}>

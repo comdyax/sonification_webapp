@@ -156,10 +156,6 @@ async def get_distance_to_next_data(
         StatisticData: A dictionary with the distance-to-next calculations.
     """
     data = request.data
-    if len(data) > 1000:
-        raise HTTPException(
-            status_code=400, detail="List too large, maximum size is 1000."
-        )
     df = pd.DataFrame({"time": np.linspace(0, duration_s, len(data)), "value": data})
     df = add_distance_to_next(df=df, on_column="value", to_column="value")
     df = df.round(1)
@@ -191,10 +187,6 @@ async def get_polynomial_fit_data(
         StatisticData: A dictionary with polynomial fit values or their deviations.
     """
     data = request.data
-    if len(data) > 1000:
-        raise HTTPException(
-            status_code=400, detail="List too large, maximum size is 1000."
-        )
     df = pd.DataFrame({"time": np.linspace(0, duration_s, len(data)), "value": data})
     if (degree is None) or (degree >= len(df)):
         degree = find_best_polynomial_fit(df=df, on_column="value")[2]
@@ -241,10 +233,6 @@ async def get_rolling_average_data(
         StatisticData: Data with rolling average or the deviation optionally.
     """
     data = request.data
-    if len(data) > 1000:
-        raise HTTPException(
-            status_code=400, detail="List too large, maximum size is 1000."
-        )
     df = pd.DataFrame({"time": np.linspace(0, duration_s, len(data)), "value": data})
     if not deviation:
         df = add_rolling_average(
@@ -294,10 +282,6 @@ async def get_summary_statistic_data(
         StatisticData: Data with summary statistic or the deviation.
     """
     data = request.data
-    if len(data) > 1000:
-        raise HTTPException(
-            status_code=400, detail="List too large, maximum size is 1000."
-        )
     df = pd.DataFrame({"time": np.linspace(0, duration_s, len(data)), "value": data})
     if not deviation:
         df = add_summary_statistic(
